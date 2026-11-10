@@ -1,0 +1,3 @@
+"""
+Pakiet testów dla CodeMate.
+"""
