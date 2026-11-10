@@ -1,3 +1,57 @@
-/src/__pycache__
-/src/lang/__pycache__
-/src/modules/__pycache__
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# CodeMate - pliki lokalne
+baza_skryptow.log
+baza_skryptow.cfg
+baza_skryptow.json
+baza_skryptow.json.bak*
+*.bsdb
+events.log
+
+# System plików
+.DS_Store
+Thumbs.db
+
+# Testy
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Dokumentacja
+_build/
+
+# Myśli
