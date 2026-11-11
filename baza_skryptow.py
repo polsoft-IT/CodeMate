@@ -2449,9 +2449,9 @@ class MouseManager:
     def _add_zoom_submenu(self, menu):
         """Dodaje podmenu zoom do menu."""
         zoom_m = self._make_menu()
-        zoom_m.add_command(label="Powieksz  (Ctrl+scroll)",
+        zoom_m.add_command(label=_tr("Powieksz  (Ctrl+scroll)"),
                            command=lambda: self._zoom_step(+1))
-        zoom_m.add_command(label="Pomniejsz (Ctrl+scroll)",
+        zoom_m.add_command(label=_tr("Pomniejsz (Ctrl+scroll)"),
                            command=lambda: self._zoom_step(-1))
         zoom_m.add_separator()
         for sz in [8, 9, 10, 11, 12, 14, 16, 18, 20, 24]:
@@ -2462,26 +2462,26 @@ class MouseManager:
                     self._apply_zoom(),
                     self._show_zoom_toast(s)))
         zoom_m.add_separator()
-        zoom_m.add_command(label="Reset (10 pt)", command=self._zoom_reset)
-        menu.add_cascade(label="Zoom czcionki", menu=zoom_m)
+        zoom_m.add_command(label=_tr("Reset (10 pt)"), command=self._zoom_reset)
+        menu.add_cascade(label=_tr("Zoom czcionki"), menu=zoom_m)
 
     def _build_text_menu(self, menu, w, app):
         """Buduje menu kontekstowe dla tk.Text."""
         is_code = (w is getattr(app, "text_kod", None) or
                    w is getattr(app, "edytor_text", None))
 
-        menu.add_command(label="Wytnij         Ctrl+X",
+        menu.add_command(label=_tr("Wytnij         Ctrl+X"),
                          command=lambda: w.event_generate("<<Cut>>"))
-        menu.add_command(label="Kopiuj         Ctrl+C",
+        menu.add_command(label=_tr("Kopiuj         Ctrl+C"),
                          command=lambda: w.event_generate("<<Copy>>"))
-        menu.add_command(label="Wklej           Ctrl+V",
+        menu.add_command(label=_tr("Wklej           Ctrl+V"),
                          command=lambda: w.event_generate("<<Paste>>"))
-        menu.add_command(label="Cofnij          Ctrl+Z",
+        menu.add_command(label=_tr("Cofnij          Ctrl+Z"),
                          command=lambda: w.event_generate("<<Undo>>"))
-        menu.add_command(label="Ponow           Ctrl+Y",
+        menu.add_command(label=_tr("Ponow           Ctrl+Y"),
                          command=lambda: w.event_generate("<<Redo>>"))
         menu.add_separator()
-        menu.add_command(label="Zaznacz wszystko  Ctrl+A",
+        menu.add_command(label=_tr("Zaznacz wszystko  Ctrl+A"),
                          command=lambda: (w.tag_add("sel", "1.0", "end"),
                                          w.mark_set("insert", "end")))
         menu.add_separator()
@@ -2489,60 +2489,60 @@ class MouseManager:
         has_sel = self._has_sel(w)
         if has_sel:
             sel_m = self._make_menu()
-            sel_m.add_command(label="Na male litery",
+            sel_m.add_command(label=_tr("Na male litery"),
                               command=lambda: self._transform_sel(w, str.lower))
-            sel_m.add_command(label="Na WIELKIE litery",
+            sel_m.add_command(label=_tr("Na WIELKIE litery"),
                               command=lambda: self._transform_sel(w, str.upper))
-            sel_m.add_command(label="Title Case",
+            sel_m.add_command(label=_tr("Title Case"),
                               command=lambda: self._transform_sel(w, str.title))
-            sel_m.add_command(label="Odwroc tekst",
+            sel_m.add_command(label=_tr("Odwroc tekst"),
                               command=lambda: self._transform_sel(w, lambda s: s[::-1]))
             sel_m.add_separator()
-            sel_m.add_command(label="Statystyki zaznaczenia",
+            sel_m.add_command(label=_tr("Statystyki zaznaczenia"),
                               command=lambda: self._count_sel(w))
-            sel_m.add_command(label="Policz wystapienia",
+            sel_m.add_command(label=_tr("Policz wystapienia"),
                               command=lambda: self._count_occurrences(w))
-            menu.add_cascade(label="Zaznaczenie", menu=sel_m)
+            menu.add_cascade(label=_tr("Zaznaczenie"), menu=sel_m)
 
         line_m = self._make_menu()
-        line_m.add_command(label="Usun biezaca linie  Ctrl+D",
+        line_m.add_command(label=_tr("Usun biezaca linie  Ctrl+D"),
                            command=lambda: self._delete_line(w))
-        line_m.add_command(label="Przesun linie w gore",
+        line_m.add_command(label=_tr("Przesun linie w gore"),
                            command=lambda: self._move_line(w, -1))
-        line_m.add_command(label="Przesun linie w dol",
+        line_m.add_command(label=_tr("Przesun linie w dol"),
                            command=lambda: self._move_line(w, +1))
         line_m.add_separator()
-        line_m.add_command(label="Kopiuj biezaca linie",
+        line_m.add_command(label=_tr("Kopiuj biezaca linie"),
                            command=lambda: self._copy_line(w))
-        line_m.add_command(label="Duplikuj linie",
+        line_m.add_command(label=_tr("Duplikuj linie"),
                            command=lambda: self._duplicate_line(w))
-        menu.add_cascade(label="Linia", menu=line_m)
+        menu.add_cascade(label=_tr("Linia"), menu=line_m)
 
         if is_code:
             code_m = self._make_menu()
-            code_m.add_command(label="Komentuj / odkomentuj  Ctrl+/",
+            code_m.add_command(label=_tr("Komentuj / odkomentuj  Ctrl+/"),
                                command=lambda: self._toggle_comment(w))
-            code_m.add_command(label="Wciecie (+4 spacje)     Tab",
+            code_m.add_command(label=_tr("Wciecie (+4 spacje)     Tab"),
                                command=lambda: self._indent_sel(w, +1))
-            code_m.add_command(label="Wciecie (-4 spacje)  Shift+Tab",
+            code_m.add_command(label=_tr("Wciecie (-4 spacje)  Shift+Tab"),
                                command=lambda: self._indent_sel(w, -1))
             code_m.add_separator()
-            code_m.add_command(label="Usun trailing spaces",
+            code_m.add_command(label=_tr("Usun trailing spaces"),
                                command=lambda: self._strip_trailing(w))
-            code_m.add_command(label="Dodaj numery linii (tekst)",
+            code_m.add_command(label=_tr("Dodaj numery linii (tekst)"),
                                command=lambda: self._add_line_numbers(w))
-            code_m.add_command(label="Sortuj linie A-Z",
+            code_m.add_command(label=_tr("Sortuj linie A-Z"),
                                command=lambda: self._sort_lines(w, reverse=False))
-            code_m.add_command(label="Sortuj linie Z-A",
+            code_m.add_command(label=_tr("Sortuj linie Z-A"),
                                command=lambda: self._sort_lines(w, reverse=True))
-            code_m.add_command(label="Usun duplikaty linii",
+            code_m.add_command(label=_tr("Usun duplikaty linii"),
                                command=lambda: self._remove_dup_lines(w))
-            menu.add_cascade(label="Kod", menu=code_m)
-            menu.add_command(label="Znajdz / Zastap  Ctrl+H",
+            menu.add_cascade(label=_tr("Kod"), menu=code_m)
+            menu.add_command(label=_tr("Znajdz / Zastap  Ctrl+H"),
                              command=lambda: self._open_find_replace(w))
 
         menu.add_separator()
-        menu.add_command(label="Wyczysc edytor",
+        menu.add_command(label=_tr("Wyczysc edytor"),
                          command=lambda: w.delete("1.0", "end"))
         menu.add_separator()
         self._add_zoom_submenu(menu)
@@ -2554,68 +2554,69 @@ class MouseManager:
 
         if sel:
             if n == 1:
-                menu.add_command(label="Otworz w edytorze",
+                menu.add_command(label=_tr("Otworz w edytorze"),
                                  command=lambda: app._otworz_skrypt())
-                menu.add_command(label="Edytuj skrypt",
+                menu.add_command(label=_tr("Edytuj skrypt"),
                                  command=lambda: app._edytuj_skrypt())
-                menu.add_command(label="Kopiuj kod",
+                menu.add_command(label=_tr("Kopiuj kod"),
                                  command=lambda: self._tree_copy_kod(w))
-                menu.add_command(label="Kopiuj nazwe",
+                menu.add_command(label=_tr("Kopiuj nazwe"),
                                  command=lambda: self._tree_copy_field(w, 0))
-                menu.add_command(label="Duplikuj skrypt",
+                menu.add_command(label=_tr("Duplikuj skrypt"),
                                  command=lambda: self._tree_duplicate(w))
                 menu.add_separator()
-            lbl_usun = f"Usun  ({n} skrypt" + ("y" if 1<n<5 else "ow" if n>=5 else "") + ")"
+            lbl_usun = f"{_tr('Usun')}  ({n})"
             menu.add_command(label=lbl_usun,
                              command=lambda: app._usun_skrypt())
             exp_m = self._make_menu()
-            exp_m.add_command(label="Eksportuj jako .py",
+            exp_m.add_command(label=_tr("Eksportuj jako .py"),
                               command=lambda: self._tree_export_sel(w, "py"))
-            exp_m.add_command(label="Eksportuj jako .txt",
+            exp_m.add_command(label=_tr("Eksportuj jako .txt"),
                               command=lambda: self._tree_export_sel(w, "txt"))
-            exp_m.add_command(label="Eksportuj jako .json",
+            exp_m.add_command(label=_tr("Eksportuj jako .json"),
                               command=lambda: self._tree_export_sel(w, "json"))
-            menu.add_cascade(label="Eksportuj zaznaczone", menu=exp_m)
+            menu.add_cascade(label=_tr("Eksportuj zaznaczone"), menu=exp_m)
             menu.add_separator()
 
-        menu.add_command(label="Nowy skrypt",
+        menu.add_command(label=_tr("Nowy skrypt"),
                          command=lambda: app._menu_nowy_skrypt())
-        menu.add_command(label="Odswiez liste",
+        menu.add_command(label=_tr("Odswiez liste"),
                          command=lambda: app._refresh_lista())
-        menu.add_command(label="Zaznacz wszystko  Ctrl+A",
+        menu.add_command(label=_tr("Zaznacz wszystko  Ctrl+A"),
                          command=lambda: self._tree_select_all(w))
         menu.add_separator()
 
         sort_m = self._make_menu()
         for lbl, field, order in [
-            ("A-Z  Nazwa rosnaco",    "nazwa",     "ASC"),
-            ("Z-A  Nazwa malejaco",   "nazwa",     "DESC"),
-            ("Kategoria A-Z",         "kategoria", "ASC"),
-            ("Kategoria Z-A",         "kategoria", "DESC"),
-            ("Tagi A-Z",              "tagi",      "ASC"),
+            (_tr("A-Z  Nazwa rosnaco"),    "nazwa",     "ASC"),
+            (_tr("Z-A  Nazwa malejaco"),   "nazwa",     "DESC"),
+            (_tr("Kategoria A-Z"),         "kategoria", "ASC"),
+            (_tr("Kategoria Z-A"),         "kategoria", "DESC"),
+            (_tr("Tagi A-Z"),              "tagi",      "ASC"),
         ]:
             sort_m.add_command(label=lbl,
                                command=lambda f=field, o=order: app._menu_sortuj(f, o))
-        menu.add_cascade(label="Sortuj", menu=sort_m)
+        menu.add_cascade(label=_tr("Sortuj"), menu=sort_m)
 
         fil_m = self._make_menu()
         kats  = sorted({s.get("kategoria","") for s in app.skrypty if s.get("kategoria")})
-        fil_m.add_command(label="Wszystkie kategorie",
+        fil_m.add_command(label=_tr("Wszystkie kategorie"),
                           command=lambda: app._menu_sortuj("nazwa", "ASC"))
         fil_m.add_separator()
         for kat in kats:
             fil_m.add_command(label=f"  {kat}",
                               command=lambda k=kat: self._tree_filter_kat(w, k))
-        menu.add_cascade(label="Filtruj wg kategorii", menu=fil_m)
+        menu.add_cascade(label=_tr("Filtruj wg kategorii"), menu=fil_m)
         menu.add_separator()
-        menu.add_command(label="Eksportuj cala baze...",
+        menu.add_command(label=_tr("Eksportuj cala baze..."),
                          command=lambda: app._lista_eksportuj())
-        menu.add_command(label="Importuj baze...",
+        menu.add_command(label=_tr("Importuj baze..."),
                          command=lambda: app._lista_importuj())
         menu.add_separator()
         total    = len(app.skrypty)
         kats_cnt = len({s.get("kategoria","") for s in app.skrypty})
-        menu.add_command(label=f"  {total} skryptow  /  {kats_cnt} kategorii",
+        menu.add_command(label=(f"  {total} {_tr('skryptow')}  /  "
+                                f"{kats_cnt} {_tr('kategorii')}"),
                          state="disabled")
 
     def _build_listbox_menu(self, menu, w, app):
@@ -2625,24 +2626,24 @@ class MouseManager:
             items = [w.get(i) for i in sel]
             val   = items[0]
             menu.add_command(
-                label=f"Kopiuj: {val[:30]}{'...' if len(val)>30 else ''}",
+                label=f"{_tr('Kopiuj')}: {val[:30]}{'...' if len(val)>30 else ''}",
                 command=lambda v=val: (app.clipboard_clear(),
                                       app.clipboard_append(v)))
             if len(items) > 1:
                 menu.add_command(
-                    label=f"Kopiuj wszystkie ({len(items)})",
+                    label=f"{_tr('Kopiuj wszystkie')} ({len(items)})",
                     command=lambda vs=items: (app.clipboard_clear(),
                                               app.clipboard_append("\n".join(vs))))
             menu.add_separator()
-            menu.add_command(label="Usun zaznaczone",
+            menu.add_command(label=_tr("Usun zaznaczone"),
                              command=lambda: self._listbox_delete_sel(w))
             menu.add_separator()
-        menu.add_command(label="Odswiez",
+        menu.add_command(label=_tr("Odswiez"),
                          command=lambda: self._try_refresh(w))
-        menu.add_command(label="Eksportuj jako TXT",
+        menu.add_command(label=_tr("Eksportuj jako TXT"),
                          command=lambda: self._listbox_export(w))
         menu.add_separator()
-        menu.add_command(label=f"  {w.size()} elementow", state="disabled")
+        menu.add_command(label=f"  {w.size()} {_tr('elementow')}", state="disabled")
 
     def _build_entry_menu(self, menu, w, app):
         """Buduje menu kontekstowe dla Entry/Combobox."""
@@ -2651,24 +2652,24 @@ class MouseManager:
             val = w.get()
         except Exception as e:
             logging.warning(f"Błąd odczytu Entry: {e}")
-        menu.add_command(label="Wytnij",
+        menu.add_command(label=_tr("Wytnij"),
                          command=lambda: w.event_generate("<<Cut>>"))
-        menu.add_command(label="Kopiuj",
+        menu.add_command(label=_tr("Kopiuj"),
                          command=lambda: w.event_generate("<<Copy>>"))
-        menu.add_command(label="Wklej",
+        menu.add_command(label=_tr("Wklej"),
                          command=lambda: w.event_generate("<<Paste>>"))
         menu.add_separator()
-        menu.add_command(label="Zaznacz wszystko",
+        menu.add_command(label=_tr("Zaznacz wszystko"),
                          command=lambda: (w.select_range(0, "end"),
                                          w.icursor("end")))
-        menu.add_command(label="Wyczysc pole",
+        menu.add_command(label=_tr("Wyczysc pole"),
                          command=lambda: w.delete(0, "end"))
         menu.add_separator()
         if val.strip():
-            menu.add_command(label="Na male litery",
+            menu.add_command(label=_tr("Na male litery"),
                              command=lambda v=val: (w.delete(0, "end"),
                                                     w.insert(0, v.lower())))
-            menu.add_command(label="Na WIELKIE litery",
+            menu.add_command(label=_tr("Na WIELKIE litery"),
                              command=lambda v=val: (w.delete(0, "end"),
                                                     w.insert(0, v.upper())))
             menu.add_separator()
@@ -2681,9 +2682,9 @@ class MouseManager:
                     label=f"  {h[:40]}{'...' if len(h)>40 else ''}",
                     command=lambda v=h: (w.delete(0, "end"), w.insert(0, v)))
             hist_m.add_separator()
-            hist_m.add_command(label="Wyczysc historie",
+            hist_m.add_command(label=_tr("Wyczysc historie"),
                                command=lambda: self._entry_history.update({wid: []}))
-            menu.add_cascade(label="Historia wpisow", menu=hist_m)
+            menu.add_cascade(label=_tr("Historia wpisow"), menu=hist_m)
         if isinstance(w, ttk.Combobox):
             vals = list(w.cget("values") or [])
             if vals:
@@ -2691,51 +2692,51 @@ class MouseManager:
                 for v in vals:
                     val_m.add_command(label=f"  {v}",
                                       command=lambda vv=v: w.set(vv))
-                menu.add_cascade(label="Dostepne wartosci", menu=val_m)
+                menu.add_cascade(label=_tr("Dostepne wartosci"), menu=val_m)
 
     def _build_canvas_menu(self, menu, w, app):
         """Buduje menu kontekstowe dla tk.Canvas."""
-        menu.add_command(label="Powieksz", command=lambda: self._zoom_step(+1))
-        menu.add_command(label="Pomniejsz", command=lambda: self._zoom_step(-1))
-        menu.add_command(label="Reset widoku",
+        menu.add_command(label=_tr("Powieksz"), command=lambda: self._zoom_step(+1))
+        menu.add_command(label=_tr("Pomniejsz"), command=lambda: self._zoom_step(-1))
+        menu.add_command(label=_tr("Reset widoku"),
                          command=lambda: (w.xview_moveto(0), w.yview_moveto(0)))
         menu.add_separator()
-        menu.add_command(label="Eksportuj jako PS",
+        menu.add_command(label=_tr("Eksportuj jako PS"),
                          command=lambda: self._canvas_export_ps(w))
         menu.add_separator()
-        menu.add_command(label="Odswiez", command=lambda: self._try_refresh(w))
+        menu.add_command(label=_tr("Odswiez"), command=lambda: self._try_refresh(w))
 
     def _build_general_menu(self, menu, app):
         """Buduje ogólne menu kontekstowe."""
-        menu.add_command(label="Nowy skrypt      Ctrl+N",
+        menu.add_command(label=_tr("Nowy skrypt      Ctrl+N"),
                          command=app._menu_nowy_skrypt)
-        menu.add_command(label="Lista skryptow   Ctrl+L",
+        menu.add_command(label=_tr("Lista skryptow   Ctrl+L"),
                          command=app._menu_pokaz_liste)
-        menu.add_command(label="Szukaj           Ctrl+F",
+        menu.add_command(label=_tr("Szukaj           Ctrl+F"),
                          command=app._menu_pokaz_szukaj)
-        menu.add_command(label="Zapisz           Ctrl+S",
+        menu.add_command(label=_tr("Zapisz           Ctrl+S"),
                          command=app._zapisz)
         menu.add_separator()
-        menu.add_command(label="Odswiez          F5",
+        menu.add_command(label=_tr("Odswiez          F5"),
                          command=app._menu_odswiez)
         menu.add_separator()
         self._add_zoom_submenu(menu)
         menu.add_separator()
         gest_m = self._make_menu()
         for lbl in [
-            "prawo      -> nastepna zakladka",
-            "lewo       -> poprzednia zakladka",
-            "dol        -> odswiez",
-            "gora       -> nowy skrypt",
-            "prawo-gora -> eksport bazy",
-            "lewo-gora  -> import bazy",
-            "prawo-dol  -> szukaj",
-            "lewo-dol   -> lista skryptow",
+            _tr("prawo      -> nastepna zakladka"),
+            _tr("lewo       -> poprzednia zakladka"),
+            _tr("dol        -> odswiez"),
+            _tr("gora       -> nowy skrypt"),
+            _tr("prawo-gora -> eksport bazy"),
+            _tr("lewo-gora  -> import bazy"),
+            _tr("prawo-dol  -> szukaj"),
+            _tr("lewo-dol   -> lista skryptow"),
         ]:
             gest_m.add_command(label=lbl, state="disabled")
-        menu.add_cascade(label="Gesty myszy (sciagatka)", menu=gest_m)
+        menu.add_cascade(label=_tr("Gesty myszy (sciagatka)"), menu=gest_m)
         menu.add_separator()
-        menu.add_command(label="O programie",      command=app._menu_o_programie)
+        menu.add_command(label=_tr("O programie"),      command=app._menu_o_programie)
 
     # ── Operacje na tekście ────────────────────────────────────────────────────
     def _transform_sel(self, widget, func):
