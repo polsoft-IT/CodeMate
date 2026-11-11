@@ -17,6 +17,7 @@ Welcome to the CodeMate documentation - an application for managing Python/Bash/
    :hidden:
 
    /pl/index
+   /gallery
 
 .. figure:: /_static/screenshot.png
    :alt: CodeMate main window
@@ -55,3 +56,4 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+* :doc:`Gallery </gallery>`

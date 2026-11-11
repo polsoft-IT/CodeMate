@@ -13,6 +13,11 @@ Witamy w dokumentacji CodeMate - aplikacji do zarządzania skryptami Python/Bash
    plugins
    contributing
 
+.. toctree::
+   :hidden:
+
+   /gallery
+
 .. figure:: /_static/screenshot.png
    :alt: Główne okno CodeMate
    :align: center
@@ -50,3 +55,4 @@ Indeksy i tabele
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+* :doc:`Galeria </gallery>`
