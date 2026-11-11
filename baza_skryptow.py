@@ -259,6 +259,7 @@ DAILY_BACKUP_KEEP = 7         # ile dziennych kopii trzymać (rotacja)
 
 # Stałe UI
 TOOLTIP_DELAY_MS = 600        # opóźnienie tooltipa
+TOOLTIP_GRACE_MS = 300        # grace na powrót do widgetu z tooltipem (anty-mruganie)
 GESTURE_THRESHOLD = 40        # piksele - próg gestu myszy
 FONT_SIZE_MIN = 7             # minimalny rozmiar czcionki
 FONT_SIZE_MAX = 28            # maksymalny rozmiar czcionki
@@ -1875,6 +1876,7 @@ class MouseManager:
     """
 
     TOOLTIP_DELAY_MS  = TOOLTIP_DELAY_MS
+    TOOLTIP_GRACE_MS  = TOOLTIP_GRACE_MS
     GESTURE_THRESHOLD = GESTURE_THRESHOLD
     FONT_SIZE_MIN     = FONT_SIZE_MIN
     FONT_SIZE_MAX     = FONT_SIZE_MAX
@@ -1909,9 +1911,12 @@ class MouseManager:
         self._gesture_widget  = None
         self._gesture_moved   = False
 
-        self._tooltip_win    = None
-        self._tooltip_after  = None
-        self._tooltip_widget = None
+        self._tooltip_win        = None
+        self._tooltip_win_widget = None
+        self._tooltip_after      = None
+        self._tooltip_hide       = None
+        self._tooltip_dismiss    = None
+        self._tooltip_widget     = None
 
         self._editor_font_size = 10
         self._zoom_toast       = None
@@ -1934,48 +1939,149 @@ class MouseManager:
     # ── TOOLTIPS ──────────────────────────────────────────────────────────────
     def attach_tooltip(self, widget, text):
         widget.bind("<Enter>",       lambda e: self._tooltip_schedule(widget, text), add="+")
-        widget.bind("<Leave>",       lambda e: self._tooltip_cancel(),                add="+")
+        widget.bind("<Leave>",       lambda e: self._tooltip_leave(),                   add="+")
         widget.bind("<ButtonPress>", lambda e: self._tooltip_cancel(),                add="+")
 
     def _tooltip_schedule(self, widget, text):
-        self._tooltip_cancel()
+        # Powrót na widget z widocznym tooltipem (drganie kursora przy
+        # krawędzi albo skrzyżowanie z innym widgetem i powrót) — zostaw
+        # go, nie pokazuj ponownie. Zapobiega pętli show/hide = mruganiu.
+        if self._tooltip_win is not None and widget is self._tooltip_win_widget:
+            self._cancel_tooltip_timers()
+            self._tooltip_widget = widget
+            return
+        # Ten sam widget ma jeszcze oczekujący pokaz — nie resetuj timera.
+        if self._tooltip_widget is widget and self._tooltip_after is not None:
+            self._cancel_tooltip_hide()
+            return
+        # Inny widget: widoczny tooltip NIE jest niszczony od razu — dostaje
+        # krótki grace period, więc szybki powrót nie powoduje mrugania.
+        self._cancel_tooltip_timers()
+        if self._tooltip_win is not None:
+            self._tooltip_dismiss = self.app.after(
+                self.TOOLTIP_GRACE_MS, self._tooltip_dismiss_win)
         self._tooltip_widget = widget
         self._tooltip_after  = self.app.after(
             self.TOOLTIP_DELAY_MS,
             lambda: self._tooltip_show(widget, text))
 
+    def _tooltip_leave(self):
+        """Opuścenie widgetu — ukryj tooltip z małym opóźnieniem.
+
+        Bez opóźnienia tooltip pojawiający się pod kursorem powoduje
+        natychmiastowy <Leave> → destroy → <Enter> → pokazanie — mruganie.
+        """
+        if (self._tooltip_win is None and self._tooltip_after is None
+                and self._tooltip_dismiss is None):
+            return
+        if self._tooltip_hide:
+            try:
+                self.app.after_cancel(self._tooltip_hide)
+            except Exception:
+                pass
+        self._tooltip_hide = self.app.after(250, self._tooltip_cancel)
+
+    def _cancel_tooltip_timers(self):
+        for attr in ("_tooltip_after", "_tooltip_hide", "_tooltip_dismiss"):
+            tid = getattr(self, attr, None)
+            if tid:
+                try:
+                    self.app.after_cancel(tid)
+                except Exception:
+                    pass
+                setattr(self, attr, None)
+
+    def _tooltip_dismiss_win(self):
+        """Zniszcz samą ramkę tooltipa po grace period — timery (np.
+        oczekujący pokaz nowego widgetu) zostają nietknięte."""
+        self._tooltip_dismiss = None
+        if self._tooltip_win is not None:
+            try:
+                self._tooltip_win.destroy()
+            except Exception:
+                pass
+            self._tooltip_win = None
+            self._tooltip_win_widget = None
+
     def _tooltip_cancel(self):
-        if self._tooltip_after:
-            self.app.after_cancel(self._tooltip_after)
-            self._tooltip_after = None
+        self._cancel_tooltip_timers()
         if self._tooltip_win:
             try:
                 self._tooltip_win.destroy()
             except Exception:
                 pass
             self._tooltip_win = None
+            self._tooltip_win_widget = None
+        self._tooltip_widget = None
 
     def _tooltip_show(self, widget, text):
+        self._tooltip_after = None  # timer już się wyzwolił
         if not widget.winfo_exists():
             return
+        # Nie pokazuj, gdy wskaźnik już opuścił widget (np. szybkie
+        # przeciągnięcie kursora między elementami).
+        try:
+            px, py = self.app.winfo_pointerxy()
+            cont = self.app.winfo_containing(px, py)
+            w = cont
+            over = False
+            while w is not None:
+                if str(w) == str(widget):
+                    over = True
+                    break
+                try:
+                    w = w.nametowidget(w.winfo_parent())
+                except Exception:
+                    break
+            if not over:
+                return
+        except Exception:
+            pass
         try:
             x = widget.winfo_rootx() + 12
             y = widget.winfo_rooty() + widget.winfo_height() + 6
             sw = self.app.winfo_screenwidth()
             if x + 220 > sw:
                 x = sw - 224
+            # Przytnij Y do ekranu — Windows może przenieść okno nad widget.
+            sh = self.app.winfo_screenheight()
+            if y + 60 > sh:
+                y = max(8, widget.winfo_rooty() - 66)
         except Exception:
             return
+        # Stary tooltip (np. w grace period) ustępuje nowemu.
+        if self._tooltip_win is not None:
+            try:
+                self._tooltip_win.destroy()
+            except Exception:
+                pass
+        self._tooltip_win = None
+        self._tooltip_win_widget = None
+        self._tooltip_after = None
         win = _popup(self.app)
         win.wm_overrideredirect(True)
         win.wm_geometry(f"+{x}+{y}")
         win.attributes("-topmost", True)
+        # Można najechać na tooltip — wtedy nie ukrywaj go od razu.
+        win.bind("<Enter>", lambda e: self._cancel_tooltip_hide())
+        win.bind("<Leave>", lambda e: self._tooltip_cancel())
         outer = tk.Frame(win, bg="#3a3f58", bd=1)
         outer.pack(fill="both", expand=True)
         tk.Label(outer, text=_tr(text), font=("Consolas", 8),
                  bg="#1e2130", fg="#c8d0f0",
                  padx=10, pady=5, justify="left").pack()
         self._tooltip_win = win
+        self._tooltip_win_widget = widget
+
+    def _cancel_tooltip_hide(self):
+        for attr in ("_tooltip_hide", "_tooltip_dismiss"):
+            tid = getattr(self, attr, None)
+            if tid:
+                try:
+                    self.app.after_cancel(tid)
+                except Exception:
+                    pass
+                setattr(self, attr, None)
 
     # ── ŚRODKOWY PRZYCISK — PAN ────────────────────────────────────────────────
     def _on_middle_press(self, event):
@@ -13676,12 +13782,12 @@ class CodeMate(tk.Tk):
         self._db_sel_sub = _sel_db_sub
 
         for i, (label, key) in enumerate(db_sub_tabs):
-            b = tk.Button(sub_bar, text=label, font=FONT_UI,
+            b = self._trw(tk.Button(sub_bar, text=_tr(label), font=FONT_UI,
                           bg=BG_SUBTAB_ACT if i == 0 else BG_SUBTAB_INACT,
                           fg=FG_WHITE       if i == 0 else FG_GRAY,
                           relief="flat", padx=12, pady=5, cursor="hand2",
                           bd=0, highlightthickness=0,
-                          command=lambda i=i, k=key: _sel_db_sub(i, k))
+                          command=lambda i=i, k=key: _sel_db_sub(i, k)), label)
             b.pack(side="left")
             self._db_sub_btns.append(b)
 
@@ -13705,11 +13811,11 @@ class CodeMate(tk.Tk):
         row_path = tk.Frame(pconn, bg=BG_DARK)
         row_path.pack(fill="x", padx=12, pady=4)
         self._trw(tk.Label(row_path, text=_tr("Plik bazy SQLite:"), font=FONT_UI,
-                 bg=BG_DARK, fg=FG_GRAY, width=18, anchor="w"), "Plik bazy SQLite:").pack(side="left")
+                 bg=BG_DARK, fg=FG_GRAY, anchor="w"), "Plik bazy SQLite:").pack(side="left")
         tk.Entry(row_path, textvariable=self._db_path, font=FONT_MONO,
                  bg=BG_INPUT, fg=FG_WHITE, insertbackground=FG_WHITE,
                  relief="flat", highlightthickness=1, highlightbackground=BORDER_CLR,
-                 highlightcolor=ACCENT_BLUE, width=44).pack(side="left", padx=(0, 6))
+                 highlightcolor=ACCENT_BLUE, width=36).pack(side="left", padx=(0, 6), fill="x", expand=True)
         self._trw(tk.Button(row_path, text=_tr("📂 Przeglądaj…"), font=FONT_UI,
                   bg=BTN_DARK, fg=FG_WHITE, relief="flat", padx=8, pady=3,
                   cursor="hand2", activebackground=BTN_HOVER, activeforeground=FG_WHITE,
@@ -13760,10 +13866,10 @@ class CodeMate(tk.Tk):
             ("📥 Importuj z JSON",   self._db_import_json),
             ("🗑 Wyczyść tabele",    self._db_drop_all),
         ]:
-            tk.Button(row_quick, text=txt, font=FONT_UI,
+            self._trw(tk.Button(row_quick, text=_tr(txt), font=FONT_UI,
                       bg=BTN_DARK, fg=FG_WHITE, relief="flat", padx=8, pady=4,
                       cursor="hand2", activebackground=BTN_HOVER, activeforeground=FG_WHITE,
-                      command=cmd).pack(side="left", padx=3)
+                      command=cmd), txt).pack(side="left", padx=3)
 
         # ════════════════════════════════════════════════════════════════════
         # PANEL 2 — PLIKI BAZY DANYCH
@@ -13784,10 +13890,10 @@ class CodeMate(tk.Tk):
             ("🔍 Skanuj folder", self._db_scan_folder),
             ("♻ Odśwież",       self._db_refresh_files),
         ]:
-            tk.Button(fbar, text=txt, font=FONT_UI,
+            self._trw(tk.Button(fbar, text=_tr(txt), font=FONT_UI,
                       bg=BTN_DARK, fg=FG_WHITE, relief="flat", padx=8, pady=4,
                       cursor="hand2", activebackground=BTN_HOVER, activeforeground=FG_WHITE,
-                      command=cmd).pack(side="left", padx=3)
+                      command=cmd), txt).pack(side="left", padx=3)
 
         # drzewko plików
         tree_frame = tk.Frame(pfiles, bg=BG_DARK)
@@ -13797,7 +13903,7 @@ class CodeMate(tk.Tk):
         self._db_files_tree = ttk.Treeview(tree_frame, columns=cols, show="headings",
                                             height=14, selectmode="browse")
         for c, w in zip(cols, (180, 90, 160, 360)):
-            self._db_files_tree.heading(c, text=c)
+            self._trh(self._db_files_tree, c, c)
             self._db_files_tree.column(c, width=w, anchor="w")
         self._db_files_tree.tag_configure("odd",  background=BG_ROW_ODD)
         self._db_files_tree.tag_configure("even", background=BG_ROW_EVEN)
@@ -13819,10 +13925,10 @@ class CodeMate(tk.Tk):
             ("🗑 Usuń plik",         self._db_delete_selected_file),
             ("📤 Eksportuj wybrany", self._db_export_selected),
         ]:
-            tk.Button(fbtm, text=txt, font=FONT_UI,
+            self._trw(tk.Button(fbtm, text=_tr(txt), font=FONT_UI,
                       bg=BTN_DARK, fg=FG_WHITE, relief="flat", padx=8, pady=4,
                       cursor="hand2", activebackground=BTN_HOVER, activeforeground=FG_WHITE,
-                      command=cmd).pack(side="left", padx=3)
+                      command=cmd), txt).pack(side="left", padx=3)
 
         # ════════════════════════════════════════════════════════════════════
         # PANEL 3 — ZAPYTANIA SQL
@@ -13876,12 +13982,12 @@ class CodeMate(tk.Tk):
             ("Schemat",       "SELECT sql FROM sqlite_master WHERE type='table' AND name='tabela';"),
         ]
         for lbl, sql in templates:
-            tk.Button(qbar, text=lbl, font=("Consolas", 8),
+            self._trw(tk.Button(qbar, text=_tr(lbl), font=("Consolas", 8),
                       bg=BG_SUBTAB_INACT, fg=FG_GRAY, relief="flat", padx=6, pady=3,
                       cursor="hand2", activebackground=BTN_HOVER, activeforeground=FG_WHITE,
                       command=lambda s=sql: (self._db_sql_text.delete("1.0", "end"),
                                             self._db_sql_text.insert("1.0", s))
-                      ).pack(side="left", padx=2)
+                      ), lbl).pack(side="left", padx=2)
 
         history_bar = tk.Frame(pquery, bg=BG_DARK)
         history_bar.pack(fill="x", padx=12, pady=(5, 3))
@@ -14029,10 +14135,10 @@ class CodeMate(tk.Tk):
             ("💾 Zapisz log",  self._db_save_log),
             ("📋 Kopiuj log",  self._db_copy_log),
         ]:
-            tk.Button(log_btn_f, text=txt, font=FONT_UI,
+            self._trw(tk.Button(log_btn_f, text=_tr(txt), font=FONT_UI,
                       bg=BTN_DARK, fg=FG_WHITE, relief="flat", padx=8, pady=4,
                       cursor="hand2", activebackground=BTN_HOVER, activeforeground=FG_WHITE,
-                      command=cmd).pack(side="left", padx=3)
+                      command=cmd), txt).pack(side="left", padx=3)
 
         self._db_log_text = tk.Text(plog, font=("Consolas", 9), bg=BG_PANEL,
                                      fg=FG_WHITE, relief="flat",
