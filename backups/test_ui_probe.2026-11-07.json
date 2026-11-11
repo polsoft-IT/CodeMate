@@ -1,0 +1,13 @@
+{
+  "schema": 2,
+  "app": "CodeMate v4.0",
+  "exported": "2026-11-07 16:48:12",
+  "skrypty": [
+    {
+      "id": "t1",
+      "nazwa": "Test",
+      "kategoria": "Python",
+      "kod": "print(1)"
+    }
+  ]
+}
