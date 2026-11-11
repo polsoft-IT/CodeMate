@@ -93,6 +93,10 @@ pip install pygments
 
 Freeware — see the notice at the top of this file.
 
+## Test results
+
+![Test results](docs/_static/test%20results.png)
+
 ## Author
 
 - **Author:** Sebastian Januchowski
