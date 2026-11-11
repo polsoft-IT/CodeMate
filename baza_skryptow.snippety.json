@@ -2,156 +2,156 @@
   "schema": 1,
   "snippety": [
     {
-      "nazwa": "Py — pomiar czasu wykonania",
+      "nazwa": "Py — execution time measurement",
       "kategoria": "Python",
-      "tagi": "czas timer benchmark",
-      "tresc": "import time\n\nstart = time.perf_counter()\n# ...kod do zmierzenia...\nelapsed = time.perf_counter() - start\nprint(f'Czas: {elapsed:.4f} s')\n",
-      "id": "5896ca275f204264bebd1c1fde111b96",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tagi": "time timer benchmark",
+      "tresc": "import time\n\nstart = time.perf_counter()\n# ...code to measure...\nelapsed = time.perf_counter() - start\nprint(f'Time: {elapsed:.4f} s')\n",
+      "id": "762389d4bd504ad79ad2e3486ba63ec3",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "Py — odczyt argumentów CLI",
+      "nazwa": "Py — reading CLI arguments",
       "kategoria": "Python",
-      "tagi": "argv cli argumenty",
-      "tresc": "import sys\n\nif len(sys.argv) < 2:\n    print('Użycie: skrypt.py <argument>')\n    sys.exit(1)\n\nargument = sys.argv[1]\nprint(f'Podano: {argument}')\n",
-      "id": "2ee4fadedb4c4eadb2e4f712878eaf80",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tagi": "argv cli arguments",
+      "tresc": "import sys\n\nif len(sys.argv) < 2:\n    print('Usage: script.py <argument>')\n    sys.exit(1)\n\nargument = sys.argv[1]\nprint(f'Given: {argument}')\n",
+      "id": "a0a6e8a2868d4498a9d12369c116c03b",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "Py — iterowanie po katalogu",
+      "nazwa": "Py — iterating over a directory",
       "kategoria": "Python",
-      "tagi": "path pliki katalog glob",
-      "tresc": "from pathlib import Path\n\nfor plik in Path('.').rglob('*.py'):\n    print(f'{plik} — {plik.stat().st_size} B')\n",
-      "id": "c3420d456092422e86248c4aef86fa4d",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tagi": "path files directory glob",
+      "tresc": "from pathlib import Path\n\nfor file in Path('.').rglob('*.py'):\n    print(f'{file} — {file.stat().st_size} B')\n",
+      "id": "d250607f599348f7a78982e51a262694",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "Py — zapytanie HTTP z retry",
+      "nazwa": "Py — HTTP request with retry",
       "kategoria": "Python",
-      "tagi": "requests http retry ponawianie",
-      "tresc": "import time\nimport requests\n\nurl = 'https://api.example.com/data'\nfor próba in range(1, 4):\n    try:\n        r = requests.get(url, timeout=10)\n        r.raise_for_status()\n        print(r.json())\n        break\n    except requests.RequestException as e:\n        print(f'Próba {próba} nieudana: {e}')\n        time.sleep(2 ** próba)\n",
-      "id": "c6b5cfbbb8954128a72c1ffd893b73a1",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tagi": "requests http retry",
+      "tresc": "import time\nimport requests\n\nurl = 'https://api.example.com/data'\nfor attempt in range(1, 4):\n    try:\n        r = requests.get(url, timeout=10)\n        r.raise_for_status()\n        print(r.json())\n        break\n    except requests.RequestException as e:\n        print(f'Attempt {attempt} failed: {e}')\n        time.sleep(2 ** attempt)\n",
+      "id": "246b3e709a6d40b9bd822e8975397cb4",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "Py — słownik z kluczem domyślnym",
+      "nazwa": "Py — dictionary with default key",
       "kategoria": "Python",
-      "tagi": "defaultdict słownik",
-      "tresc": "from collections import defaultdict\n\ngrupy = defaultdict(list)\nfor element in dane:\n    grupy[element['klucz']].append(element)\n\nfor klucz, wartosci in grupy.items():\n    print(klucz, len(wartosci))\n",
-      "id": "9af332056bb64774b65ee51da4484895",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tagi": "defaultdict dictionary",
+      "tresc": "from collections import defaultdict\n\ngroups = defaultdict(list)\nfor item in data:\n    groups[item['key']].append(item)\n\nfor key, values in groups.items():\n    print(key, len(values))\n",
+      "id": "5406f48d1f5343adb568842829adb2a1",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "Bash — backup katalogu z datą",
+      "nazwa": "Bash — directory backup with date",
       "kategoria": "Bash",
-      "tagi": "backup kopia tar data",
-      "tresc": "#!/usr/bin/env bash\nset -euo pipefail\n\nSRC=\"./dane\"\nDEST=\"./backup\"\nNAZWA=\"backup_$(date +%Y%m%d_%H%M%S).tar.gz\"\n\nmkdir -p \"$DEST\"\ntar -czf \"$DEST/$NAZWA\" -C \"$SRC\" .\necho \"Utworzono: $DEST/$NAZWA\"\n",
-      "id": "55a8379a659d495f91b259e3464f5955",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tagi": "backup copy tar date",
+      "tresc": "#!/usr/bin/env bash\nset -euo pipefail\n\nSRC=\"./data\"\nDEST=\"./backup\"\nNAME=\"backup_$(date +%Y%m%d_%H%M%S).tar.gz\"\n\nmkdir -p \"$DEST\"\ntar -czf \"$DEST/$NAME\" -C \"$SRC\" .\necho \"Created: $DEST/$NAME\"\n",
+      "id": "2e56585ef10545fe956a07f1c2e9cf48",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "Bash — sprawdzenie czy plik istnieje",
+      "nazwa": "Bash — check if a file exists",
       "kategoria": "Bash",
-      "tagi": "plik istnienie warunek",
-      "tresc": "#!/usr/bin/env bash\nPLIK=\"$1\"\n\nif [[ -f \"$PLIK\" ]]; then\n    echo \"Plik istnieje: $PLIK\"\nelif [[ -d \"$PLIK\" ]]; then\n    echo \"Katalog istnieje: $PLIK\"\nelse\n    echo \"Nie znaleziono: $PLIK\"\n    exit 1\nfi\n",
-      "id": "d3376baa3d43473c94670858e3416a1d",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tagi": "file exists condition",
+      "tresc": "#!/usr/bin/env bash\nFILE=\"$1\"\n\nif [[ -f \"$FILE\" ]]; then\n    echo \"File exists: $FILE\"\nelif [[ -d \"$FILE\" ]]; then\n    echo \"Directory exists: $FILE\"\nelse\n    echo \"Not found: $FILE\"\n    exit 1\nfi\n",
+      "id": "9bd62e2824a948789c03b17275cece2a",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "Bash — pobranie strony przez curl",
+      "nazwa": "Bash — download a page with curl",
       "kategoria": "Bash",
-      "tagi": "curl http pobieranie",
-      "tresc": "#!/usr/bin/env bash\nURL=\"https://example.com\"\nOUT=\"strona.html\"\n\ncurl -fsSL --retry 3 -o \"$OUT\" \"$URL\" \\\n    && echo \"Zapisano: $OUT\" \\\n    || { echo 'Błąd pobierania'; exit 1; }\n",
-      "id": "4c23868b830d4615ac1b6014668d59a9",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tagi": "curl http download",
+      "tresc": "#!/usr/bin/env bash\nURL=\"https://example.com\"\nOUT=\"page.html\"\n\ncurl -fsSL --retry 3 -o \"$OUT\" \"$URL\" \\\n    && echo \"Saved: $OUT\" \\\n    || { echo 'Download error'; exit 1; }\n",
+      "id": "cdf3765db7e3464aa2bc12d92dfaa817",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "PS — lista uruchomionych procesów",
+      "nazwa": "PS — list of running processes",
       "kategoria": "PowerShell",
-      "tagi": "procesy get-process",
+      "tagi": "processes get-process",
       "tresc": "Get-Process | Sort-Object CPU -Descending |\n    Select-Object -First 10 Name, Id, CPU, WorkingSet64 |\n    Format-Table -AutoSize\n",
-      "id": "990255b14f444e8e8d37946cab9ab51b",
-      "zmieniony": "2026-11-07 13:53:33"
+      "id": "5d9caf6a24b84fe7ab90cc58bcf89263",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "PS — sprawdzenie wolnego miejsca na dysku",
+      "nazwa": "PS — check free disk space",
       "kategoria": "PowerShell",
-      "tagi": "dysk miejsce disk",
-      "tresc": "Get-PSDrive -PSProvider FileSystem |\n    Select-Object Name, @{n='Wolne [GB]';e={[math]::Round($_.Free/1GB, 2)}},\n                    @{n='Zajęte [GB]';e={[math]::Round($_.Used/1GB, 2)}} |\n    Format-Table -AutoSize\n",
-      "id": "96240ce5837b421cab876ef07583852b",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tagi": "disk space drive",
+      "tresc": "Get-PSDrive -PSProvider FileSystem |\n    Select-Object Name, @{n='Free [GB]';e={[math]::Round($_.Free/1GB, 2)}},\n                    @{n='Used [GB]';e={[math]::Round($_.Used/1GB, 2)}} |\n    Format-Table -AutoSize\n",
+      "id": "ea6ece7b40b24e66914262c87c70c203",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "PS — eksport użytkowników AD do CSV",
+      "nazwa": "PS — export AD users to CSV",
       "kategoria": "PowerShell",
       "tagi": "ad active directory csv",
       "tresc": "Import-Module ActiveDirectory\n\nGet-ADUser -Filter * -Properties DisplayName, Mail, Enabled |\n    Select-Object SamAccountName, DisplayName, Mail, Enabled |\n    Export-Csv -Path 'users.csv' -Encoding UTF8 -NoTypeInformation\n",
-      "id": "3f4396ec10484e23a1bb97768eb918b8",
-      "zmieniony": "2026-11-07 13:53:33"
+      "id": "a20560851ccd4d8791cfb999d2bc851e",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "JS — fetch z obsługą błędów",
+      "nazwa": "JS — fetch with error handling",
       "kategoria": "JavaScript",
       "tagi": "fetch http async",
-      "tresc": "async function pobierz(url) {\n  try {\n    const res = await fetch(url);\n    if (!res.ok) throw new Error(`HTTP ${res.status}`);\n    return await res.json();\n  } catch (err) {\n    console.error('Błąd:', err.message);\n    return null;\n  }\n}\n\npobierz('https://api.example.com/data').then(console.log);\n",
-      "id": "a8c3c36f3d5244528db9dfdf75c446fb",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tresc": "async function fetchData(url) {\n  try {\n    const res = await fetch(url);\n    if (!res.ok) throw new Error(`HTTP ${res.status}`);\n    return await res.json();\n  } catch (err) {\n    console.error('Error:', err.message);\n    return null;\n  }\n}\n\nfetchData('https://api.example.com/data').then(console.log);\n",
+      "id": "9b034d10edb349cfa4d266850ba3befa",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "JS — debounce funkcji",
+      "nazwa": "JS — function debounce",
       "kategoria": "JavaScript",
-      "tagi": "debounce opóźnienie eventy",
-      "tresc": "function debounce(fn, ms = 300) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), ms);\n  };\n}\n\n// użycie:\n// window.addEventListener('resize', debounce(() => console.log('resize')))\n",
-      "id": "2165bbb13430476abb67250d636e1b3e",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tagi": "debounce delay events",
+      "tresc": "function debounce(fn, ms = 300) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), ms);\n  };\n}\n\n// usage:\n// window.addEventListener('resize', debounce(() => console.log('resize')))\n",
+      "id": "d5cb4e2cac4545ebb6351b03e5ed31fd",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "BAT — kopia plików z logiem",
+      "nazwa": "BAT — copy files with log",
       "kategoria": "Batch",
-      "tagi": "kopia robocopy log",
-      "tresc": "@echo off\nsetlocal\n\nset SRC=C:\\dane\nset DST=D:\\backup\nset LOG=%DST%\\kopia.log\n\nrobocopy \"%SRC%\" \"%DST%\" /MIR /NFL /NDL \\\n  /LOG:\"%LOG%\"\necho Zakończono, log: %LOG%\n",
-      "id": "0a3c3096f5194b3698a843934f5ff212",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tagi": "copy robocopy log",
+      "tresc": "@echo off\nsetlocal\n\nset SRC=C:\\data\nset DST=D:\\backup\nset LOG=%DST%\\copy.log\n\nrobocopy \"%SRC%\" \"%DST%\" /MIR /NFL /NDL \\\n  /LOG:\"%LOG%\"\necho Done, log: %LOG%\n",
+      "id": "37b8fe3b4b8a44f38ad27199dc780b49",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "BAT — sprawdzenie łączności ping",
+      "nazwa": "BAT — ping connectivity check",
       "kategoria": "Batch",
-      "tagi": "ping sieć",
-      "tresc": "@echo off\nset HOST=%1\nif \"%HOST%\"==\"\" set HOST=8.8.8.8\n\nping -n 4 %HOST% >nul\nif %errorlevel%==0 (\n    echo %HOST% — odpowiedź OK\n) else (\n    echo %HOST% — BRAK odpowiedzi\n    exit /b 1\n)\n",
-      "id": "3aaec4027c744e68ab4912e1217e8ad0",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tagi": "ping network",
+      "tresc": "@echo off\nset HOST=%1\nif \"%HOST%\"==\"\" set HOST=8.8.8.8\n\nping -n 4 %HOST% >nul\nif %errorlevel%==0 (\n    echo %HOST% — reply OK\n) else (\n    echo %HOST% — NO reply\n    exit /b 1\n)\n",
+      "id": "e0f80e152d5b4f5984d7111cbc5cbc1f",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "SQL — top 10 wierszy z tabeli",
+      "nazwa": "SQL — top 10 rows from a table",
       "kategoria": "SQL",
       "tagi": "select top limit",
-      "tresc": "-- SQLite / PostgreSQL\nSELECT *\nFROM nazwa_tabeli\nORDER BY id DESC\nLIMIT 10;\n\n-- SQL Server\nSELECT TOP 10 *\nFROM nazwa_tabeli\nORDER BY id DESC;\n",
-      "id": "2795d7d0e5954514bffab04c445ae6ef",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tresc": "-- SQLite / PostgreSQL\nSELECT *\nFROM table_name\nORDER BY id DESC\nLIMIT 10;\n\n-- SQL Server\nSELECT TOP 10 *\nFROM table_name\nORDER BY id DESC;\n",
+      "id": "0f91d2b84de845e8afa35d7237612c81",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "SQL — tworzenie tabeli z indeksem",
+      "nazwa": "SQL — create a table with an index",
       "kategoria": "SQL",
-      "tagi": "create table indeks",
-      "tresc": "CREATE TABLE IF NOT EXISTS klienci (\n    id      INTEGER PRIMARY KEY,\n    nazwa   TEXT NOT NULL,\n    email   TEXT UNIQUE,\n    utworzono TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE INDEX IF NOT EXISTS idx_klienci_nazwa ON klienci(nazwa);\n",
-      "id": "b1f64d1ea77040cabe27268f6a9492f3",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tagi": "create table index",
+      "tresc": "CREATE TABLE IF NOT EXISTS customers (\n    id      INTEGER PRIMARY KEY,\n    name    TEXT NOT NULL,\n    email   TEXT UNIQUE,\n    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE INDEX IF NOT EXISTS idx_customers_name ON customers(name);\n",
+      "id": "9f0e98218bbb44ae899afcd1066c1aff",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "SQL — grupowanie i agregacja",
+      "nazwa": "SQL — grouping and aggregation",
       "kategoria": "SQL",
-      "tagi": "group by count suma",
-      "tresc": "SELECT kategoria,\n       COUNT(*)          AS liczba,\n       SUM(wartosc)      AS suma,\n       AVG(wartosc)      AS srednia\nFROM zamowienia\nGROUP BY kategoria\nHAVING COUNT(*) > 1\nORDER BY suma DESC;\n",
-      "id": "c64174862dfd4611a207568e4efb0292",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tagi": "group by count sum",
+      "tresc": "SELECT category,\n       COUNT(*)          AS count,\n       SUM(value)        AS total,\n       AVG(value)        AS average\nFROM orders\nGROUP BY category\nHAVING COUNT(*) > 1\nORDER BY total DESC;\n",
+      "id": "722f67a6d565488796b96343fa1d6ede",
+      "zmieniony": "2026-11-07 17:36:24"
     },
     {
-      "nazwa": "HTML — szkielet strony HTML5",
+      "nazwa": "HTML — HTML5 page skeleton",
       "kategoria": "HTML",
-      "tagi": "szkielet html5 boilerplate",
-      "tresc": "<!DOCTYPE html>\n<html lang=\"pl\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Tytuł strony</title>\n</head>\n<body>\n  <h1>Nagłówek</h1>\n  <p>Treść strony.</p>\n</body>\n</html>\n",
-      "id": "8d410e2e191949da933b985cce82941c",
-      "zmieniony": "2026-11-07 13:53:33"
+      "tagi": "skeleton html5 boilerplate",
+      "tresc": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Page title</title>\n</head>\n<body>\n  <h1>Heading</h1>\n  <p>Page content.</p>\n</body>\n</html>\n",
+      "id": "bb7e667a717b4e718857fd25657c17b3",
+      "zmieniony": "2026-11-07 17:36:24"
     }
   ]
 }
