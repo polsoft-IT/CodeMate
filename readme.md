@@ -1,6 +1,6 @@
 # CodeMate v4.0
 
-![CodeMate main window](_static/screenshot.png)
+![CodeMate main window](docs/_static/screenshot.png)
 
 **CodeMate** is an application for managing Python, Bash, PowerShell, JavaScript and SQL scripts — with an editor, scheduler, Git integration, REST API, and a plugin system.
 
