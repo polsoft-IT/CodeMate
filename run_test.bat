@@ -2,7 +2,7 @@
 setlocal EnableExtensions
 cd /d "%~dp0"
 echo ========================================
-echo  CodeMate - uruchamianie testow
+echo  CodeMate - running tests
 echo ========================================
 echo.
 
