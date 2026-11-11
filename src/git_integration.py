@@ -126,6 +126,8 @@ class GitIntegration:
                 cwd=self.repo_path,
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 check=True,
                 timeout=self.COMMAND_TIMEOUT,
                 creationflags=_SUBPROCESS_NO_WINDOW
@@ -173,7 +175,12 @@ class GitIntegration:
         """
         if not self._initialized:
             return False
-        rel_path = file_path.relative_to(self.repo_path)
+        try:
+            rel_path = Path(file_path).resolve().relative_to(
+                self.repo_path.resolve())
+        except (ValueError, OSError):
+            self.last_error = "File is outside the Git repository"
+            return False
         success, _ = self._run_git_command(["add", str(rel_path)])
         return success
 
@@ -328,7 +335,12 @@ class GitIntegration:
 
         command = ["log", f"-{limit}", "--format=%H|%an|%ai|%s"]
         if file_path:
-            rel_path = file_path.relative_to(self.repo_path)
+            try:
+                rel_path = Path(file_path).resolve().relative_to(
+                    self.repo_path.resolve())
+            except (ValueError, OSError):
+                self.last_error = "File is outside the Git repository"
+                return []
             command.append(str(rel_path))
 
         success, output = self._run_git_command(command)
@@ -372,7 +384,12 @@ class GitIntegration:
             command.append(commit_hash1)
 
         if file_path:
-            rel_path = file_path.relative_to(self.repo_path)
+            try:
+                rel_path = Path(file_path).resolve().relative_to(
+                    self.repo_path.resolve())
+            except (ValueError, OSError):
+                self.last_error = "File is outside the Git repository"
+                return ""
             command.append("--")
             command.append(str(rel_path))
 
@@ -401,7 +418,11 @@ class GitIntegration:
         if not self._initialized:
             return None
 
-        rel_path = file_path.relative_to(self.repo_path)
+        try:
+            rel_path = Path(file_path).resolve().relative_to(
+                self.repo_path.resolve())
+        except (ValueError, OSError):
+            return None
         success, output = self._run_git_command(["show", f"{commit_hash}:{rel_path}"])
         return output if success else None
 
@@ -419,7 +440,12 @@ class GitIntegration:
         if not self._initialized:
             return False
 
-        rel_path = file_path.relative_to(self.repo_path)
+        try:
+            rel_path = Path(file_path).resolve().relative_to(
+                self.repo_path.resolve())
+        except (ValueError, OSError):
+            self.last_error = "File is outside the Git repository"
+            return False
         success, _ = self._run_git_command(["checkout", commit_hash, "--", str(rel_path)])
         return success
 
