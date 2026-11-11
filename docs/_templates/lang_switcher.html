@@ -1,0 +1,10 @@
+{# Language switcher — shows links to all language versions of the docs. #}
+<div class="lang-switcher" style="padding: 0 12px 8px 12px; font-size: 0.9em;">
+  {% if lang_switch %}
+  <strong>{{ _("Language") }}:</strong>
+    {% for code, name, url in lang_switch %}
+      {% if url %}<a href="{{ url }}">{{ name }}</a>{% else %}<span>{{ name }}</span>{% endif %}
+      {% if not loop.last %} | {% endif %}
+    {% endfor %}
+  {% endif %}
+</div>

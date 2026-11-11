@@ -1,0 +1,11 @@
+{% extends "!layout.html" %}
+
+{# Insert the language switcher right below the project logo/title. #}
+{% block extrabody %}
+{{ super() }}
+{% endblock %}
+
+{% block sidebartitle %}
+{{ super() }}
+{% include 'lang_switcher.html' %}
+{% endblock %}

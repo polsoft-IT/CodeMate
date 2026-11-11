@@ -1,42 +1,28 @@
-CodeMate v4.0
-==================
+CodeMate
+========
 
-Witamy w dokumentacji CodeMate - aplikacji do zarządzania skryptami Python/Bash/PowerShell/JavaScript/SQL.
+Documentation for **CodeMate** - an application for managing Python, Bash, PowerShell, JavaScript and SQL scripts.
+
+Choose a language:
 
 .. toctree::
    :maxdepth: 2
-   :caption: Zawartość:
+   :caption: Languages / Języki
 
-   installation
-   usage
-   api
-   plugins
-   contributing
+   en/index
+   pl/index
 
-Funkcje
---------
+.. figure:: /_static/screenshot.png
+   :alt: CodeMate main window
+   :align: center
 
-* **Edytor z podświetlaniem składni** - wsparcie dla Python, Bash, PowerShell, JavaScript, SQL
-* **Harmonogram uruchomień** - automatyczne uruchamianie skryptów według harmonogramu
-* **Kosz** - bezpieczne usuwanie i przywracanie skryptów
-* **Szablony** - szybkie tworzenie nowych skryptów na podstawie szablonów
-* **Statystyki** - szczegółowe statystyki użycia skryptów
-* **Wyszukiwanie** - szybkie wyszukiwanie w całej bazie
-* **Eksport/Import** - łatwe przenoszenie bazy między komputerami
-* **VirtualEnv** - obsługa środowisk wirtualnych Python
-* **VDrive** - wirtualny dysk do przechowywania plików
-* **Terminal** - wbudowany terminal
-* **Runner** - uruchamianie skryptów z pełnym monitorowaniem
-* **Integracja Git** - automatyczne wersjonowanie zmian
-* **System pluginów** - rozszerzalność poprzez pluginy
-* **Marketplace pluginów** - instalacja z katalogu HTTPS z kontrolą SHA-256
-* **Eksport `.exe`** - budowanie samodzielnych aplikacji Python przez PyInstaller
-* **REST API** - uruchamianie zaufanych skryptów, statusy zadań i anulowanie
-* **Synchronizacja Git** - push bazy i bezpieczny pull fast-forward
+   The main CodeMate application window. / Główne okno aplikacji CodeMate.
 
-Indeksy i tabele
-==================
+.. tip::
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   **License / Licencja:** Freeware.
+   This software is free for personal and commercial use. Redistribution is
+   permitted as long as the original package remains unmodified.
+   Ten program jest darmowy (freeware) i może być używany zarówno w celach
+   prywatnych, jak i komercyjnych. Redystrybucja dozwolona wyłącznie w
+   niezmienionej, oryginalnej formie.

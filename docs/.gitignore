@@ -1,0 +1,14 @@
+# Sphinx build output
+_build/
+
+# Byte-compiled / cache
+__pycache__/
+*.pyc
+
+# OS junk
+Thumbs.db
+.DS_Store
+
+# Environment
+.env
+.venv/

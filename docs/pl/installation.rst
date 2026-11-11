@@ -7,7 +7,7 @@ Wymagania
 * Python 3.8 lub nowszy
 * Tkinter (zazwyczaj wbudowany w Python)
 
-Instalacja z zależnościami
+Instalacja z zaleznosciami
 --------------------------
 
 Zainstaluj wymagane pakiety:
@@ -19,7 +19,7 @@ Zainstaluj wymagane pakiety:
 Instalacja
 -----------
 
-Uruchom aplikację:
+Uruchom aplikacje:
 
 .. code-block:: bash
 
@@ -32,13 +32,13 @@ Przy pierwszym uruchomieniu aplikacja automatycznie:
 
 1. Utworzy plik bazy danych ``baza_skryptow.json``
 2. Utworzy plik konfiguracyjny ``baza_skryptow.cfg``
-3. Zainicjalizuje repozytorium Git (jeśli Git jest dostępny)
-4. Załaduje pluginy z katalogu ``plugins/``
+3. Zainicjalizuje repozytorium Git (jesli Git jest dostepny)
+4. Zaladuje pluginy z katalogu ``plugins/``
 
-Opcjonalne zależności
+Opcjonalne zaleznosci
 ---------------------
 
-**Pygments** (dla podświetlania składni):
+**Pygments** (dla podswietlania skladni):
 
 .. code-block:: bash
 
@@ -70,4 +70,4 @@ Budowanie dokumentacji
    cd docs
    make html
 
-Dokumentacja będzie dostępna w ``docs/_build/html/index.html``.
+Dokumentacja bedzie dostepna w ``docs/_build/html/index.html``.

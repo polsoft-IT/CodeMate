@@ -15,6 +15,7 @@ Każdy plugin musi dziedziczyć po klasie ``BasePlugin``:
    :members:
    :undoc-members:
    :show-inheritance:
+   :no-index:
 
 Metody do implementacji
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -67,6 +68,18 @@ Dostępne hooki
 Przykładowy plugin
 -------------------
 
-.. literalinclude:: ../plugins/event_logger.py
-   :language: python
-   :lines: 1-
+Przykładowy szkielet działającego pluginu:
+
+.. code-block:: python
+
+   from src.plugin_system import BasePlugin
+
+   class EventLogger(BasePlugin):
+       PLUGIN_NAME = "Event Logger"
+       PLUGIN_VERSION = "1.0.0"
+
+       def on_load(self):
+           self.register_hook("after_script_save", self.log)
+
+       def log(self, script_data):
+           print("zapisano skrypt:", script_data)

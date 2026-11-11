@@ -209,6 +209,7 @@ Scentralizowana konfiguracja
    - **Powiadomienia** - powiadomienie po zadaniu harmonogramu
 
    **🎨 Personalizacja**
+
    - **Wygląd** - motyw, czcionka (z przyciskiem wyboru koloru obok
      comboboxa), rozmiar, kolory zakładek i tekstu. Kolor czcionki
      (ustawienie **Kolor czcionki**) dotyczy tekstu w edytorach, listach

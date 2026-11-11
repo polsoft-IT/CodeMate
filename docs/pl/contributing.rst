@@ -117,4 +117,6 @@ Przykład:
 Licencja
 --------
 
-Projekt jest dostępny na licencji określonej w pliku LICENSE.
+CodeMate jest dystrybuowany jako **freeware**: program jest darmowy i może być
+używany zarówno w celach prywatnych, jak i komercyjnych. Redystrybucja
+dozwolona wyłącznie w niezmienionej, oryginalnej formie.
