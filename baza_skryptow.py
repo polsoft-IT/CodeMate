@@ -194,7 +194,7 @@ if sys.stderr is not None and hasattr(sys.stderr, "reconfigure"):
 DB_SCHEMA = 2              # wersja formatu pliku bazy — podnoś przy zmianie struktury
 APP_VER   = "4.0"        # wersja aplikacji (metadane / --version)
 
-APP_DIR  = Path(__file__).parent
+APP_DIR  = Path(_APP_DIR)
 DB_FILE  = APP_DIR / "baza_skryptow.json"
 CFG_FILE = APP_DIR / "baza_skryptow.cfg"
 SNIPPETS_FILE = APP_DIR / "baza_skryptow.snippety.json"
@@ -1938,9 +1938,10 @@ class MouseManager:
 
     # ── TOOLTIPS ──────────────────────────────────────────────────────────────
     def attach_tooltip(self, widget, text):
-        widget.bind("<Enter>",       lambda e: self._tooltip_schedule(widget, text), add="+")
-        widget.bind("<Leave>",       lambda e: self._tooltip_leave(),                   add="+")
-        widget.bind("<ButtonPress>", lambda e: self._tooltip_cancel(),                add="+")
+        # Tooltipy (chmurki z opisami) wyłączone — ich okienka mrugały
+        # przy najechaniu na zakładki. Metoda zostaje jako no-op, żeby
+        # istniejące wywołania nie wymagały zmian.
+        return
 
     def _tooltip_schedule(self, widget, text):
         # Powrót na widget z widocznym tooltipem (drganie kursora przy
@@ -11901,12 +11902,12 @@ class CodeMate(tk.Tk):
             ("📟 Log / Terminal", "log"),
         ]
         for j, (lbl, key) in enumerate(venv_tabs):
-            b = tk.Button(venv_sub_bar, text=_tr(lbl), font=FONT_UI,
+            b = self._trw(tk.Button(venv_sub_bar, text=_tr(lbl), font=FONT_UI,
                           bg=BG_SUBTAB_ACT if j == 0 else BG_SUBTAB_INACT,
                           fg=FG_WHITE       if j == 0 else FG_GRAY,
                           relief="flat", padx=14, pady=6, cursor="hand2",
                           bd=0, highlightthickness=0,
-                          command=lambda j=j, k=key: sel_venv(j, k))
+                          command=lambda j=j, k=key: sel_venv(j, k)), lbl)
             b.pack(side="left")
             self._venv_btns.append(b)
 
@@ -12069,10 +12070,10 @@ class CodeMate(tk.Tk):
         bar.pack(fill="x")
 
         def btn(text, cmd, color=BTN_DARK):
-            tk.Button(bar, text=_tr(text), font=FONT_UI, bg=color, fg=FG_WHITE,
+            self._trw(tk.Button(bar, text=_tr(text), font=FONT_UI, bg=color, fg=FG_WHITE,
                       relief="flat", padx=10, pady=4, cursor="hand2",
                       activebackground=BTN_HOVER, activeforeground=FG_WHITE,
-                      command=cmd).pack(side="left", padx=3)
+                      command=cmd), text).pack(side="left", padx=3)
 
         btn("🔄 Odśwież",        self._venv_refresh_list)
         btn("➕ Utwórz nowy",    lambda: self._venv_sel(1, "create"), ACCENT_BLUE)
@@ -12139,10 +12140,10 @@ class CodeMate(tk.Tk):
         act_bar.pack(fill="x")
 
         def abtn(text, cmd, color=BTN_DARK):
-            tk.Button(act_bar, text=_tr(text), font=FONT_UI, bg=color, fg=FG_WHITE,
+            self._trw(tk.Button(act_bar, text=_tr(text), font=FONT_UI, bg=color, fg=FG_WHITE,
                       relief="flat", padx=10, pady=4, cursor="hand2",
                       activebackground=BTN_HOVER,
-                      command=cmd).pack(side="left", padx=3)
+                      command=cmd), text).pack(side="left", padx=3)
 
         abtn("📦 Pokaż pakiety",     self._venv_show_packages)
         abtn("⬆ Aktualizuj pip",    self._venv_upgrade_pip, BTN_OK)
@@ -12233,8 +12234,8 @@ class CodeMate(tk.Tk):
         def row(label, widget_factory):
             r = tk.Frame(body, bg=BG_DARK)
             r.pack(fill="x", pady=5)
-            tk.Label(r, text=_tr(label), font=FONT_BOLD, bg=BG_DARK,
-                     fg=FG_GRAY, width=22, anchor="w").pack(side="left")
+            self._trw(tk.Label(r, text=_tr(label), font=FONT_BOLD, bg=BG_DARK,
+                     fg=FG_GRAY, width=22, anchor="w"), label).pack(side="left")
             w = widget_factory(r)
             w.pack(side="left", fill="x", expand=True)
             return w
@@ -12292,9 +12293,9 @@ class CodeMate(tk.Tk):
             ("Wyczyść jeśli istnieje", self.venv_opt_clear),
             ("Aktualizuj deps",        self.venv_opt_upgrade),
         ]:
-            tk.Checkbutton(opts, text=_tr(text), variable=var, font=FONT_UI,
+            self._trw(tk.Checkbutton(opts, text=_tr(text), variable=var, font=FONT_UI,
                            bg=BG_DARK, fg=FG_WHITE, activebackground=BG_DARK,
-                           selectcolor=BG_INPUT).pack(side="left", padx=10)
+                           selectcolor=BG_INPUT), text).pack(side="left", padx=10)
 
         tk.Frame(body, bg=BORDER_CLR, height=1).pack(fill="x", pady=12)
 
@@ -12438,7 +12439,7 @@ class CodeMate(tk.Tk):
                                            yscrollcommand=vsb.set)
         vsb.config(command=self.venv_pkg_tree.yview)
         for col, w in [("Pakiet", 200), ("Wersja", 120), ("Lokalizacja", 500)]:
-            self.venv_pkg_tree.heading(col, text=_tr(col))
+            self._trh(self.venv_pkg_tree, col, col)
             self.venv_pkg_tree.column(col, width=w, minwidth=80)
         self.venv_pkg_tree.pack(fill="both", expand=True)
         self.venv_pkg_tree.tag_configure("odd",  background=BG_ROW_ODD)
@@ -12636,8 +12637,8 @@ class CodeMate(tk.Tk):
 
         def section(title):
             tk.Frame(body, bg=BORDER_CLR, height=1).pack(fill="x", pady=(14, 4))
-            tk.Label(body, text=_tr(title), font=FONT_BOLD, bg=BG_DARK,
-                     fg=ACCENT_BLUE).pack(anchor="w")
+            self._trw(tk.Label(body, text=_tr(title), font=FONT_BOLD, bg=BG_DARK,
+                     fg=ACCENT_BLUE), title).pack(anchor="w")
 
         section("📁 Domyślny katalog środowisk")
         dr = tk.Frame(body, bg=BG_DARK)
@@ -12771,7 +12772,7 @@ class CodeMate(tk.Tk):
         self.venv_log_text.tag_configure("error", foreground="#e07070")
         self.venv_log_text.tag_configure("info",  foreground="#8a8fa8")
 
-        self._venv_log("VirtualEnv Manager gotowy.", "ok")
+        self._venv_log(_tr("VirtualEnv Manager gotowy."), "ok")
 
     def _venv_run_pip_cmd(self):
         cmd_str = self.venv_cmd_entry.get().strip()
@@ -18127,7 +18128,7 @@ class CodeMate(tk.Tk):
         for col, txt, w in (("name", "Nazwa", 190), ("version", "Wersja", 70),
                             ("author", "Autor", 140), ("category", "Kategoria", 90),
                             ("hooks", "Hooki", 60), ("enabled", "Status", 90)):
-            self._plugins_tree.heading(col, text=txt)
+            self._trh(self._plugins_tree, col, txt)
             self._plugins_tree.column(col, width=w, anchor="w")
         self._plugins_tree.tag_configure("on", foreground=SUCCESS)
         self._plugins_tree.tag_configure("off", foreground=FG_GRAY)
@@ -18445,7 +18446,7 @@ class CodeMate(tk.Tk):
             grid.pack(fill="both", expand=True)
             for i, (alias, _target, desc) in enumerate(self._NAV_COMMANDS):
                 var = _mk_nav_var(alias)
-                tk.Checkbutton(grid, text=f"/{alias} — {desc}", variable=var,
+                tk.Checkbutton(grid, text=f"/{alias} — {_tr(desc)}", variable=var,
                                font=("Consolas", 8), bg=BG_PANEL, fg=FG_GRAY,
                                selectcolor=BG_INPUT, activebackground=BG_PANEL,
                                activeforeground=FG_WHITE, anchor="w",
@@ -18516,7 +18517,7 @@ class CodeMate(tk.Tk):
             grid.pack(fill="both", expand=True)
             for i, (alias, _op, desc) in enumerate(self._FILE_COMMANDS):
                 var = _mk_file_var(alias)
-                tk.Checkbutton(grid, text=f"/{alias} — {desc}", variable=var,
+                tk.Checkbutton(grid, text=f"/{alias} — {_tr(desc)}", variable=var,
                                font=("Consolas", 8), bg=BG_PANEL, fg=FG_GRAY,
                                selectcolor=BG_INPUT, activebackground=BG_PANEL,
                                activeforeground=FG_WHITE, anchor="w",
@@ -18618,7 +18619,7 @@ class CodeMate(tk.Tk):
         tree.pack(fill="both", expand=True, padx=8, pady=8)
         for alias, meta in cmds.items():
             tree.insert("", "end", iid=alias, text="/" + alias,
-                        values=(meta["plugin"], meta["description"]))
+                        values=(meta["plugin"], _tr(meta["description"])))
         if not cmds:
             tk.Label(dlg, text=_tr("Brak komend — pluginy mogą definiować "
                                    "PLUGIN_COMMANDS = {alias: opis}."),
@@ -18676,7 +18677,7 @@ class CodeMate(tk.Tk):
         usage = self._plugin_manager.hook_usage()
         for name, hook in self._plugin_manager.hooks.items():
             tree.insert("", "end", iid=name, text=name,
-                        values=(hook.description, usage.get(name, 0)))
+                        values=(_tr(hook.description), usage.get(name, 0)))
         errs = getattr(self._plugin_manager, "load_errors", [])
         if errs:
             tk.Label(dlg, text=_tr("Błędy ładowania:") + "\n" + "\n".join(errs[:10]),
@@ -18712,7 +18713,7 @@ class CodeMate(tk.Tk):
                 ("Status", _tr("Włączony") if info.get("enabled") == "True" else _tr("Wyłączony")),
                 ("Plik", str(path) if path else "—"))
         for i, (k, v) in enumerate(rows):
-            tk.Label(body, text=k + ":", font=FONT_BOLD, bg=BG_PANEL,
+            tk.Label(body, text=_tr(k) + ":", font=FONT_BOLD, bg=BG_PANEL,
                      fg=FG_GRAY, anchor="w").grid(row=i, column=0, sticky="w", pady=2)
             tk.Label(body, text=v, font=FONT_UI, bg=BG_PANEL, fg=FG_WHITE,
                      anchor="w", wraplength=380, justify="left").grid(
@@ -18770,7 +18771,7 @@ class CodeMate(tk.Tk):
         marketplace = PluginMarketplace(plugins_dir)
 
         dialog = _popup(self)
-        dialog.title("Marketplace pluginów")
+        dialog.title(_tr("Marketplace pluginów"))
         dialog.geometry("760x420")
         dialog.transient(self)
         dialog.grab_set()
@@ -18837,22 +18838,27 @@ class CodeMate(tk.Tk):
                 return
             if not messagebox.askyesno(
                     _tr("Zaufanie do pluginu"),
-                    f"Plugin {entry['name']} zawiera wykonywalny kod. Zainstalować wersję {entry['version']}?",
+                    _tr("Plugin {name} zawiera wykonywalny kod. Zainstalować wersję {version}?").format(
+                        name=entry['name'], version=entry['version']),
                     parent=dialog):
                 return
 
             def installed(path):
                 status_lbl.configure(
-                    text=f"Zainstalowano {path.name}; uruchom aplikację ponownie, aby go załadować.")
+                    text=_tr("Zainstalowano {name}; uruchom aplikację ponownie, aby go załadować.").format(
+                        name=path.name))
 
             run_async(lambda: marketplace.install(entry), installed,
-                      f"Instalowanie {entry['name']}…", "Instalacja nie powiodła się: ")
+                      _tr("Instalowanie {name}…").format(name=entry['name']),
+                      _tr("Instalacja nie powiodła się: "))
 
         def remove_selected():
             entry = selected_entry()
             if not entry:
                 return
-            if not messagebox.askyesno(_tr("Usuń plugin"), f"Usunąć plugin {entry['name']} zainstalowany z marketplace?",
+            if not messagebox.askyesno(_tr("Usuń plugin"),
+                                       _tr("Usunąć plugin {name} zainstalowany z marketplace?").format(
+                                           name=entry['name']),
                                        parent=dialog):
                 return
             try:
@@ -18862,8 +18868,8 @@ class CodeMate(tk.Tk):
                 return
             if removed and self._plugin_manager and entry["name"] in self._plugin_manager.plugins:
                 self._plugin_manager.unload_plugin(entry["name"])
-            status_lbl.configure(text=("Usunięto plugin; zmiana będzie aktywna po restarcie."
-                                       if removed else "Plugin nie jest zarządzany przez marketplace."))
+            status_lbl.configure(text=(_tr("Usunięto plugin; zmiana będzie aktywna po restarcie.")
+                                       if removed else _tr("Plugin nie jest zarządzany przez marketplace.")))
 
         install_btn.configure(command=install_selected, state="disabled")
         install_btn.pack(side="left", padx=4)
@@ -18876,10 +18882,10 @@ class CodeMate(tk.Tk):
             for entry in catalog:
                 tree.insert("", "end", iid=entry["name"], text=entry["name"],
                             values=(entry["version"], entry["description"]))
-            status_lbl.configure(text=f"{len(entries)} pluginów w katalogu")
+            status_lbl.configure(text=_tr("{n} pluginów w katalogu").format(n=len(entries)))
 
         run_async(lambda: marketplace.fetch(index_url.strip()), catalog_loaded,
-                  "Pobieranie katalogu…", "Nie udało się pobrać katalogu: ")
+                  _tr("Pobieranie katalogu…"), _tr("Nie udało się pobrać katalogu: "))
 
     def _git_status(self):
         """Wyświetla status repozytorium Git."""
@@ -18996,34 +19002,48 @@ class CodeMate(tk.Tk):
             self._git_set_output(_tr("Brak commitów do wyświetlenia."))
 
     def _git_show_commit(self, _event=None):
-        selection = self._git_history_tree.selection()
-        if not selection or not self._git:
-            return
-        commit = self._git_history_items.get(selection[0], {})
-        diff = self._git.get_commit_diff(selection[0])
-        header = (f"{_tr('Commit')}: {selection[0]}\n"
-              f"{_tr('Autor')}: {commit.get('author', '')}\n"
-              f"{_tr('Data')}: {commit.get('date', '')}\n"
-              f"{_tr('Wiadomość')}: {commit.get('message', '')}\n\n")
-        self._git_set_output(header + (diff or _tr("Brak diffu dla tego commita.")))
+        try:
+            selection = self._git_history_tree.selection()
+            if not selection or not self._git:
+                return
+            commit = self._git_history_items.get(selection[0], {})
+            diff = self._git.get_commit_diff(selection[0])
+            header = (f"{_tr('Commit')}: {selection[0]}\n"
+                  f"{_tr('Autor')}: {commit.get('author', '')}\n"
+                  f"{_tr('Data')}: {commit.get('date', '')}\n"
+                  f"{_tr('Wiadomość')}: {commit.get('message', '')}\n\n")
+            self._git_set_output(header + (diff or _tr("Brak diffu dla tego commita.")))
+        except Exception as e:
+            logging.error("Błąd podglądu commita Git: %s", e, exc_info=True)
+            try:
+                self._git_set_output(f"{_tr('Błąd')}: {e}")
+            except Exception:
+                pass
 
     def _git_show_change(self, _event=None):
-        selection = self._git_changes_tree.selection()
-        if not selection or not self._git:
-            return
-        path = self._git_changed_paths.get(selection[0], "")
-        if not path:
-            return
-        # Buforowany status z ostatniego odświeżenia (uniknięcie subprocess
-        # przy każdym kliknięciu w listę zmian).
-        untracked = set(getattr(self, "_git_last_untracked", []))
-        if path in untracked:
-            self._git_set_output(
-                f"{_tr('Nowy plik (nieśledzony)')}: {path}\n"
-                f"{_tr('Dodaj plik do repozytorium przed podglądem diffu.')}")
-            return
-        diff = self._git.get_diff("HEAD", file_path=APP_DIR / path)
-        self._git_set_output(diff or f"{_tr('Brak diffu dla')}: {path}")
+        try:
+            selection = self._git_changes_tree.selection()
+            if not selection or not self._git:
+                return
+            path = self._git_changed_paths.get(selection[0], "")
+            if not path:
+                return
+            # Buforowany status z ostatniego odświeżenia (uniknięcie subprocess
+            # przy każdym kliknięciu w listę zmian).
+            untracked = set(getattr(self, "_git_last_untracked", []))
+            if path in untracked:
+                self._git_set_output(
+                    f"{_tr('Nowy plik (nieśledzony)')}: {path}\n"
+                    f"{_tr('Dodaj plik do repozytorium przed podglądem diffu.')}")
+                return
+            diff = self._git.get_diff("HEAD", file_path=APP_DIR / path)
+            self._git_set_output(diff or f"{_tr('Brak diffu dla')}: {path}")
+        except Exception as e:
+            logging.error("Błąd podglądu zmiany Git: %s", e, exc_info=True)
+            try:
+                self._git_set_output(f"{_tr('Błąd')}: {e}")
+            except Exception:
+                pass
 
     def _git_set_output(self, text):
         self._git_output.config(state="normal")
