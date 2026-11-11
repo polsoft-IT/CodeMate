@@ -8,7 +8,6 @@
 # Wersja: 1.0.0
 # Autor:  Sebastian Januchowski · polsoft.ITS™ Group
 # ──────────────────────────────────────────────────────────────────────────────
-import base64
 import ctypes
 import datetime
 import html
@@ -21,8 +20,6 @@ import tkinter as tk
 from tkinter import messagebox
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
-LOGO_PATH = os.path.join(APP_DIR, "src", "pic", "logo.png")
-ICON_DIR = os.path.join(APP_DIR, "src", "pic", "icons")
 VENV_PYTHONW = os.path.join(APP_DIR, ".venv", "Scripts", "pythonw.exe")
 VENV_PYTHON = os.path.join(APP_DIR, ".venv", "Scripts", "python.exe")
 
@@ -241,148 +238,7 @@ def run_tests() -> None:
     log_win.lift()
 
 
-# tłumaczenie etykiet --stats (print_stats ma zaszyte polskie napisy)
-_STATS_EN = {
-    "skryptów": "scripts",
-    "w koszu": "in trash",
-    "linii kodu": "lines of code",
-    "uruchomień": "runs",
-    "zaufanych": "trusted",
-    "z historią wersji": "with version history",
-    "plany harmonogramu": "schedule plans",
-    "kategorie": "categories",
-    "top tagi": "top tags",
-}
-
-
-def _format_stats(out: str) -> str:
-    """Formatuje wyjście --stats: każda statystyka w osobnym wierszu,
-    etykiety wyrównane do lewej, wartości w jednej pionowej kolumnie."""
-    lines = []
-    for line in out.splitlines():
-        stripped = line.strip()
-        if not stripped:
-            lines.append("")
-            continue
-        # segmenty statystyk rozdzielone 3+ spacjami, np.
-        # "skryptów: 0   w koszu: 0   linii kodu: 0"
-        segs = [s.strip() for s in re.split(r"\s{3,}", stripped) if s.strip()]
-        pairs = []
-        for s in segs:
-            lab, sep, val = s.partition(":")
-            # etykieta musi zaczynać się literą — odrzuca nagłówki
-            # typu "== CodeMate — C:\..." i notatki "[baza] ..."
-            if sep and val.strip() and re.match(r"^\w", lab.strip()):
-                lab = _STATS_EN.get(lab.strip(), lab.strip())
-                val = val.strip().replace("aktywne", "active")
-                pairs.append((lab, val))
-            else:
-                pairs = None
-                break
-        if pairs:
-            for lab, val in pairs:
-                lines.append(f"{lab + ':':<26}{val}")
-        elif stripped.rstrip(":") in _STATS_EN:
-            # nagłówki sekcji — po angielsku, od lewej
-            lines.append(_STATS_EN[stripped.rstrip(":")] + ":")
-        else:
-            lines.append(line)
-    return "\n".join(lines) + "\n"
-
-
-def show_stats() -> None:
-    """Przycisk Stats — statystyki bazy skryptów (--stats programu głównego)."""
-    win = tk.Toplevel(root)
-    win.title("CodeMate — Statistics")
-    win.configure(bg=BG_PANEL)
-    win.geometry("640x420")
-    win.overrideredirect(True)          # okno bez titlebara
-
-    # górny pasek z tytułem i przyciskiem zamknięcia
-    bar = tk.Frame(win, bg=BG_DARK, padx=8, pady=4)
-    bar.pack(fill="x")
-    bar_title = tk.Label(bar, text="Scripts — statistics",
-                         font=("Consolas", 10, "bold"),
-                         bg=BG_DARK, fg=FG_GRAY)
-    bar_title.pack(side="left")
-    tk.Button(bar, text="✕", font=("Consolas", 10, "bold"), bg=BG_BTN,
-              fg=FG_TEXT, relief="flat", width=3, bd=0, cursor="hand2",
-              activebackground=BG_BTN_HOVER, activeforeground=FG_TEXT,
-              command=win.destroy).pack(side="right")
-    for _w in (bar, bar_title):
-        _w.bind("<Button-1>", _drag_start)
-        _w.bind("<B1-Motion>", _drag_move)
-    win.bind("<Escape>", lambda e: win.destroy())
-
-    txt = tk.Text(win, font=("Consolas", 10), bg=BG_PANEL, fg=FG_TEXT,
-                  relief="flat", wrap="none", padx=10, pady=8)
-    txt.pack(fill="both", expand=True, padx=4, pady=4)
-    txt.insert("end", "⏳ Loading statistics…\n")
-    txt.tag_configure("h", font=("Consolas", 16, "bold"),
-                      foreground=ACCENT, justify="center")
-    txt.tag_configure("hs", font=("Consolas", 10),
-                      foreground=FG_TEXT, justify="center")
-    txt.tag_configure("path", font=("Consolas", 9),
-                      foreground=FG_GRAY, justify="center")
-
-    # znak wodny — logo w prawym dolnym rogu
-    try:
-        wm_img = tk.PhotoImage(file=LOGO_PATH).subsample(4)   # ~85 px
-        wm = tk.Label(win, image=wm_img, bg=BG_PANEL)
-        wm.place(relx=1.0, rely=1.0, x=-10, y=-10, anchor="se")
-        wm.image = wm_img                     # referencja — bez GC
-    except tk.TclError:
-        pass                                  # brak pliku — bez znaku
-
-    def worker() -> None:
-        try:
-            proc = subprocess.run(
-                [python(), "-X", "utf8", "baza_skryptow.py", "--stats"],
-                cwd=APP_DIR, capture_output=True, text=True,
-                encoding="utf-8", errors="replace", timeout=30)
-            out = (proc.stdout or "") + (proc.stderr or "")
-        except Exception as err:
-            out = f"Error: {err}\n"
-
-        def fill() -> None:
-            try:
-                txt.delete("1.0", "end")
-                body = _format_stats(out)
-                lines = body.split("\n")
-                if lines and lines[0].startswith("=="):
-                    # nagłówek: CodeMate (pogrubiony) + statistic + ścieżka bazy
-                    path = (lines[0].split("—", 1)[-1].strip()
-                            if "—" in lines[0] else "")
-                    txt.insert("end", "CodeMate\n", "h")
-                    txt.insert("end", "statistic\n", "hs")
-                    txt.insert("end", path + "\n\n", "path")
-                    txt.insert("end", "\n".join(lines[1:]))
-                else:
-                    txt.insert("end", body)
-                txt.see("end")
-            except tk.TclError:
-                pass                            # okno już zamknięte
-
-        try:
-            root.after(0, fill)
-        except RuntimeError:
-            pass
-
-    threading.Thread(target=worker, daemon=True).start()
-    win.lift()
-
-
 # ── Raport HTML ───────────────────────────────────────────────────────────────
-
-def _logo_data_uri() -> str:
-    """Logo jako data URI (base64) do osadzenia w raporcie HTML."""
-    try:
-        with open(LOGO_PATH, "rb") as f:
-            return "data:image/png;base64," + base64.b64encode(
-                f.read()).decode()
-    except OSError:
-        return ""
-
 
 def _build_report_html(output: str, rc: int) -> str:
     """Buduje raport HTML z surowego wyjścia pytest."""
@@ -447,11 +303,6 @@ def _build_report_html(output: str, rc: int) -> str:
                else f"✘  TESTS FAILED (exit code {rc})")
     vcls = "ok" if ok else "bad"
 
-    logo_uri = _logo_data_uri()
-    logo_html = (f'<img src="{logo_uri}" alt="" '
-                 'style="height:34px;vertical-align:-8px;'
-                 'margin-right:10px;">' if logo_uri else "◈ ")
-
     return f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <title>CodeMate — Test Report</title>
@@ -497,7 +348,7 @@ def _build_report_html(output: str, rc: int) -> str:
   .log-ok {{ color:#3fb950; font-weight:bold; }}
   .log-bad {{ color:#f85149; font-weight:bold; }}
 </style></head><body><div class="wrap">
-  <h1>{logo_html}CodeMate — Test Report</h1>
+  <h1>◈ CodeMate — Test Report</h1>
   <div class="sub">Generated: {e(stamp)} &nbsp;·&nbsp; pytest tests/ -v</div>
   <div class="verdict {vcls}">{verdict}</div>
   <div class="cards">{cards}</div>
@@ -539,7 +390,7 @@ def _spin_report_btn() -> None:
 
 def _reset_report_btn() -> None:
     _spinner["active"] = False
-    report_btn.config(state="normal", text="Report")
+    report_btn.config(state="normal", text="📊  Report")
 
 
 def generate_report() -> None:
@@ -704,15 +555,6 @@ root.overrideredirect(True)          # okno bez titlebara
 
 header = tk.Frame(root, bg=BG_PANEL, pady=10)
 header.pack(fill="x")
-
-try:
-    logo_img = tk.PhotoImage(file=LOGO_PATH)
-    logo_img = logo_img.subsample(5)        # 340 px → ~68 px
-    header_logo = tk.Label(header, image=logo_img, bg=BG_PANEL)
-    header_logo.pack()
-except tk.TclError:
-    header_logo = None                      # brak pliku — bez logo
-
 header_title = tk.Label(header, text="CodeMate",
                         font=("Consolas", 16, "bold"),
                         bg=BG_PANEL, fg=ACCENT)
@@ -725,38 +567,22 @@ btn_frame = tk.Frame(root, bg=BG_DARK, padx=20, pady=16)
 btn_frame.pack(fill="both", expand=True)
 
 
-# ── Ikonki przycisków ─────────────────────────────────────────────────────────
-button_icons = {}
-for _name in ("run", "test", "report", "stats", "about", "quit"):
-    _p = os.path.join(ICON_DIR, _name + ".png")
-    if os.path.isfile(_p):
-        try:
-            button_icons[_name] = tk.PhotoImage(file=_p)
-        except tk.TclError:
-            pass
-
-
-def make_button(text: str, cmd, color=BG_BTN, padx=0,
-                icon: str | None = None) -> None:
-    kw = {"image": button_icons[icon], "compound": "left"} \
-        if icon in button_icons else {}
+def make_button(text: str, cmd, color=BG_BTN, padx=0) -> None:
     b = tk.Button(btn_frame, text=text, font=FONT, bg=color, fg=FG_TEXT,
-                  relief="flat", padx=14, pady=8, cursor="hand2", bd=0,
-                  anchor="w",
+                  relief="flat", padx=18, pady=8, cursor="hand2", bd=0,
                   activebackground=BG_BTN_HOVER, activeforeground=FG_TEXT,
-                  command=cmd, **kw)
+                  command=cmd)
     b.pack(fill="x", pady=4, padx=padx)
     b.bind("<Enter>", lambda e, w=b: w.config(bg=BG_BTN_HOVER))
     b.bind("<Leave>", lambda e, w=b: w.config(bg=color))
     return b
 
 
-make_button("Run", run_app, ACCENT, icon="run")
-make_button("Test", run_tests, icon="test")
-report_btn = make_button("Report", generate_report, icon="report")
-make_button("Stats", show_stats, icon="stats")
-make_button("About", show_about, icon="about")
-make_button("Quit", root.destroy, icon="quit")
+make_button("▶  Run", run_app, ACCENT)
+make_button("🧪  Test", run_tests)
+report_btn = make_button("📊  Report", generate_report)
+make_button("ℹ  About", show_about)
+make_button("✕  Quit", root.destroy)
 
 footer = tk.Label(root, text="polsoft.ITS™ Group", font=("Consolas", 8),
                   bg=BG_DARK, fg=FG_GRAY, pady=6)
@@ -791,9 +617,7 @@ def _make_draggable(widget: tk.Widget) -> None:
                     bind_one(g)
 
 
-for _w in (header, header_logo, header_title, header_sub, btn_frame, footer):
-    if _w is None:
-        continue
+for _w in (header, header_title, header_sub, btn_frame, footer):
     _w.bind("<Button-1>", _drag_start)
     _w.bind("<B1-Motion>", _drag_move)
 
