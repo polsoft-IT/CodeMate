@@ -200,6 +200,18 @@ CFG_FILE = APP_DIR / "baza_skryptow.cfg"
 SNIPPETS_FILE = APP_DIR / "baza_skryptow.snippety.json"
 VDRIVE_STATE_FILE = APP_DIR / "vdrive_state.json"
 SECRETS_FILE = APP_DIR / "baza_skryptow.sekrety.json"
+
+
+def _popup(parent: tk.Misc) -> tk.Toplevel:
+    """Tworzy okno dialogowe (Toplevel) z ikoną aplikacji w pasku tytułu."""
+    win = tk.Toplevel(parent)
+    try:
+        win.iconbitmap(str(APP_DIR / "codemate.ico"))
+    except Exception:
+        pass
+    return win
+
+
 CFG_KEYS = {
     "db_path":        "",          # puste = DB_FILE
     "autosave":       "1",         # 1 = autosave po zapisie/usunięciu
@@ -1713,7 +1725,7 @@ class AutoCompleter:
 
     def _render(self, widget: tk.Text) -> None:
         if self._win is None:
-            self._win = tk.Toplevel(self.app)
+            self._win = _popup(self.app)
             self._win.wm_overrideredirect(True)
             try:
                 self._win.attributes("-topmost", True)
@@ -1954,7 +1966,7 @@ class MouseManager:
                 x = sw - 224
         except Exception:
             return
-        win = tk.Toplevel(self.app)
+        win = _popup(self.app)
         win.wm_overrideredirect(True)
         win.wm_geometry(f"+{x}+{y}")
         win.attributes("-topmost", True)
@@ -2025,7 +2037,11 @@ class MouseManager:
             if not self._scroll_axis(event.widget, "x", delta):
                 self._scroll_axis(event.widget, "y", -delta)
             return "break"
-        self._scroll_axis(event.widget, "y", -delta)
+        if not self._scroll_axis(event.widget, "y", -delta):
+            # Gdy pionowe przewijanie nigdzie nie prowadzi (brak przewijanego
+            # widgetu albo osiągnięty kres zakresu) — spróbuj poziomo.
+            # Dzięki temu kółko działa też nad szerokimi Entry/Treeview/Canvas.
+            self._scroll_axis(event.widget, "x", -delta)
         return "break"
 
     def _get_delta(self, event):
@@ -2144,7 +2160,7 @@ class MouseManager:
                 self._zoom_toast.destroy()
             except Exception:
                 pass
-        win = tk.Toplevel(self.app)
+        win = _popup(self.app)
         win.wm_overrideredirect(True)
         win.attributes("-topmost", True)
         rx = self.app.winfo_rootx() + self.app.winfo_width() - 170
@@ -2260,7 +2276,7 @@ class MouseManager:
                 self._gesture_toast.destroy()
             except Exception:
                 pass
-        win = tk.Toplevel(self.app)
+        win = _popup(self.app)
         win.wm_overrideredirect(True)
         win.attributes("-topmost", True)
         rx = self.app.winfo_rootx() + self.app.winfo_width()  // 2 - 110
@@ -2775,7 +2791,7 @@ class MouseManager:
             pass
 
     def _open_find_replace(self, widget):
-        win = tk.Toplevel(self.app)
+        win = _popup(self.app)
         win.title(_tr("Znajdz / Zastap"))
         win.resizable(False, False)
         win.attributes("-topmost", True)
@@ -4250,6 +4266,13 @@ class CodeMate(tk.Tk):
         # Język interfejsu z konfiguracji (domyślnie PL)
         _set_lang(self._cfg.get("language", "en"))
         self.title(_t("app_title", ver=APP_VER))
+        # Ikona okna (pasek tytułu / pasek zadań) — plik .ico obok aplikacji.
+        _icon = APP_DIR / "codemate.ico"
+        if _icon.exists():
+            try:
+                self.iconbitmap(str(_icon))
+            except Exception:
+                pass
         self.db_path: Path = Path(self._cfg.get("db_path") or DB_FILE)
         self._last_save: Optional[str] = None
         self._autosave_pending: Optional[int] = None
@@ -4678,7 +4701,7 @@ class CodeMate(tk.Tk):
         self._menu_pokaz_mod("laczen")
 
     def _menu_filtr_kategoria(self):
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.title(_tr("Filtruj wg kategorii"))
         dlg.configure(bg=BG_DARK)
         dlg.geometry("300x280")
@@ -4711,7 +4734,7 @@ class CodeMate(tk.Tk):
                   cursor="hand2", command=apply_filter), "Zastosuj filtr").pack(pady=14)
 
     def _menu_filtr_tagi(self):
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.title(_tr("Filtruj wg tagów"))
         dlg.configure(bg=BG_DARK)
         dlg.geometry("320x180")
@@ -4781,7 +4804,7 @@ class CodeMate(tk.Tk):
         self._update_count()
 
     def _menu_ustawienia_kategorie(self):
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.title(_tr("Kategorie skryptów"))
         dlg.configure(bg=BG_DARK)
         dlg.geometry("340x320")
@@ -4824,7 +4847,7 @@ class CodeMate(tk.Tk):
         self._diag_show("Diagnostyka bazy", buf.getvalue(), rc)
 
     def _diag_show(self, title, text, rc):
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.title(title)
         dlg.configure(bg=BG_DARK)
         dlg.geometry("760x460")
@@ -4849,7 +4872,7 @@ class CodeMate(tk.Tk):
                   command=dlg.destroy).pack(pady=8)
 
     def _menu_skroty(self):
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.title(_tr("Skróty klawiszowe"))
         dlg.configure(bg=BG_DARK)
         dlg.geometry("420x470")
@@ -4895,7 +4918,7 @@ class CodeMate(tk.Tk):
         szer = sum(kolumny) + 56          # + pasek przewijania i marginesy
         total = sum(len(wpisy) for _, wpisy in OBSL_GRUPY)
 
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.withdraw()                    # budowa bez migotania, pokazanie na końcu
         dlg.title(_tr("Obsługiwane skrypty i pliki"))
         dlg.configure(bg=BG_DARK)
@@ -4991,7 +5014,7 @@ class CodeMate(tk.Tk):
                 _tr("Menedżer sekretów"),
                 _tr("Menedżer sekretów jest niedostępny — brak biblioteki „cryptography”."))
             return
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.withdraw()                    # budowa bez migotania, pokazanie na końcu
         dlg.title(_tr("🔑 Menedżer sekretów"))
         dlg.configure(bg=BG_DARK)
@@ -5230,7 +5253,7 @@ class CodeMate(tk.Tk):
 
     def _menu_o_programie(self):
         """Okno „O programie" — informacje o aplikacji i autorze."""
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.withdraw()                    # budowa bez migotania, pokazanie na końcu
         dlg.title(_tr("O programie"))
         dlg.configure(bg=BG_DARK)
@@ -5238,13 +5261,26 @@ class CodeMate(tk.Tk):
         # ── Baner nagłówka ──────────────────────────────────────────────────
         naglowek = tk.Frame(dlg, bg=BG_PANEL)
         naglowek.pack(fill="x")
-        self._trw(tk.Label(naglowek, text=_tr("CodeMate v4.0"),
-                 font=FONT_TITLE, bg=BG_PANEL, fg=ACCENT_BLUE),
-             "CodeMate v4.0").pack(pady=(18, 2))
-        self._trw(tk.Label(naglowek,
-                 text=_tr("Zaawansowana CodeMate i narzędzi developerskich"),
-                 font=FONT_UI, bg=BG_PANEL, fg=FG_GRAY),
-                 "Zaawansowana CodeMate i narzędzi developerskich").pack(pady=(0, 16))
+        baner = tk.Frame(naglowek, bg=BG_PANEL)
+        baner.pack(pady=(18, 16))
+        # Ikona aplikacji po lewej stronie banera.
+        _icon_png = APP_DIR / "codemate.png"
+        if _icon_png.exists():
+            try:
+                _img = tk.PhotoImage(file=str(_icon_png))
+                _img = _img.subsample(8, 8)      # 500 px → ~62 px
+                dlg._banner_icon = _img          # referencja — bez niej GC usunie obraz
+                tk.Label(baner, image=_img, bg=BG_PANEL).pack(side="left", padx=(28, 16))
+            except Exception:
+                pass
+        baner_txt = tk.Frame(baner, bg=BG_PANEL)
+        baner_txt.pack(side="left")
+        self._trw(tk.Label(baner_txt, text=_tr("CodeMate v4.0"),
+                 font=FONT_TITLE, bg=BG_PANEL, fg=ACCENT_BLUE, anchor="w"),
+             "CodeMate v4.0").pack(anchor="w")
+        self._trw(tk.Label(baner_txt, text=_tr("Zaawansowana CodeMate i narzędzi developerskich"),
+                 font=FONT_UI, bg=BG_PANEL, fg=FG_GRAY, anchor="w"),
+                 "Zaawansowana CodeMate i narzędzi developerskich").pack(anchor="w", pady=(2, 0))
         tk.Frame(dlg, bg=BORDER_CLR, height=1).pack(fill="x")
 
         # ── Karta: informacje techniczne ────────────────────────────────────
@@ -5290,7 +5326,7 @@ class CodeMate(tk.Tk):
 
         # ── Rozmiar z zawartości, potem pokazanie (bez migotania) ───────────
         dlg.update_idletasks()
-        dlg.geometry(f"{max(460, dlg.winfo_reqwidth())}x{dlg.winfo_reqheight()}")
+        dlg.geometry(f"{max(560, dlg.winfo_reqwidth())}x{dlg.winfo_reqheight()}")
         dlg.resizable(False, False)
         dlg.deiconify()
         dlg.grab_set()
@@ -6632,7 +6668,7 @@ class CodeMate(tk.Tk):
             return
         sc = self.skrypty[self._edytor_current_idx]
         wersje = list(reversed(sc.get("wersje") or []))
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.title(f"Historia wersji — {sc.get('nazwa')}")
         dlg.configure(bg=BG_DARK)
         dlg.geometry("900x600")
@@ -6676,7 +6712,7 @@ class CodeMate(tk.Tk):
             txt.config(state="normal")
             txt.delete("1.0", "end")
             txt.insert("end", f"== {title} ==\n\n", "hdr")
-            for line in diff or ["(brak różnic)"]:
+            for line in diff or [_tr("(brak różnic)")]:
                 if line.startswith("+") and not line.startswith("+++"):
                     tag = "add"
                 elif line.startswith("-") and not line.startswith("---"):
@@ -6834,7 +6870,7 @@ class CodeMate(tk.Tk):
         if not output_dir:
             return
 
-        dialog = tk.Toplevel(self)
+        dialog = _popup(self)
         dialog.title(f"Eksport .exe — {script.get('nazwa', '')}")
         dialog.geometry("680x420")
         dialog.transient(self)
@@ -7742,7 +7778,7 @@ class CodeMate(tk.Tk):
                 i=i, n=sc.get('nazwa','?')[:22], lc=lc, ch=ch))
         self._stat_size_text.config(state="normal")
         self._stat_size_text.delete("1.0", "end")
-        self._stat_size_text.insert("1.0", "\n".join(lines_size) if lines_size else "(brak)")
+        self._stat_size_text.insert("1.0", "\n".join(lines_size) if lines_size else _tr("(brak)"))
         self._stat_size_text.config(state="disabled")
 
         # najczęściej uruchamiane (statystyki runnera)
@@ -8389,7 +8425,7 @@ class CodeMate(tk.Tk):
         """Dialog konfliktu przy scalaniu — decyzja dla jednego rekordu lub wszystkich."""
         if getattr(self, "_merge_choice_cache", None):
             return self._merge_choice_cache
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.title(_tr("Konflikt importu"))
         dlg.configure(bg=BG_DARK)
         dlg.transient(self)
@@ -8747,9 +8783,24 @@ class CodeMate(tk.Tk):
         paned = tk.Frame(outer, bg=BG_DARK)
         paned.pack(fill="both", expand=True)
 
-        left = tk.Frame(paned, bg=BG_PANEL, width=295)
+        left = tk.Frame(paned, bg=BG_PANEL, width=305)
         left.pack(side="left", fill="y", padx=(6, 0), pady=6)
         left.pack_propagate(False)
+
+        # Panel jest przewijany pionowo — zawartość może przekraczać wysokość okna.
+        l_sb = tk.Scrollbar(left, orient="vertical", bg=BG_PANEL,
+                            troughcolor=BG_PANEL, width=10)
+        l_sb.pack(side="right", fill="y")
+        l_canvas = tk.Canvas(left, bg=BG_PANEL, highlightthickness=0,
+                             yscrollcommand=l_sb.set)
+        l_canvas.pack(side="left", fill="both", expand=True)
+        l_sb.config(command=l_canvas.yview)
+        left = tk.Frame(l_canvas, bg=BG_PANEL)
+        l_win = l_canvas.create_window((0, 0), window=left, anchor="nw")
+        left.bind("<Configure>",
+                  lambda _e: l_canvas.configure(scrollregion=l_canvas.bbox("all")))
+        l_canvas.bind("<Configure>",
+                      lambda e: l_canvas.itemconfigure(l_win, width=e.width))
 
         def section(parent, title):
             tk.Frame(parent, bg=BORDER_CLR, height=1).pack(fill="x", pady=(8, 2))
@@ -10060,7 +10111,7 @@ class CodeMate(tk.Tk):
             messagebox.showinfo(_tr("Brak skryptów"), _tr("CodeMate jest pusta."))
             return
 
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.title(_tr("Załaduj moduły z bazy skryptów"))
         dlg.configure(bg=BG_DARK)
         dlg.geometry("480x420")
@@ -10428,16 +10479,30 @@ class CodeMate(tk.Tk):
         right.pack_propagate(False)
         self._trw(tk.Label(right, text=_tr("⚠ Cykle"), font=FONT_BOLD,
                  bg=BG_PANEL, fg="#e07070"), "⚠ Cykle").pack(anchor="w", padx=10, pady=(6, 2))
-        self.graf_cycles = tk.Listbox(right, font=FONT_MONO, bg=BG_INPUT, fg=FG_WHITE,
+        cyc_wrap = tk.Frame(right, bg=BG_PANEL)
+        cyc_wrap.pack(fill="x", padx=8, pady=(0, 6))
+        cyc_sb = tk.Scrollbar(cyc_wrap, orient="vertical", bg=BG_PANEL,
+                              troughcolor=BG_PANEL, width=8)
+        cyc_sb.pack(side="right", fill="y")
+        self.graf_cycles = tk.Listbox(cyc_wrap, font=FONT_MONO, bg=BG_INPUT, fg=FG_WHITE,
                                       relief="flat", highlightthickness=0, height=5,
-                                      selectbackground=BG_ROW_SEL, activestyle="none")
-        self.graf_cycles.pack(fill="x", padx=8, pady=(0, 6))
+                                      selectbackground=BG_ROW_SEL, activestyle="none",
+                                      yscrollcommand=cyc_sb.set)
+        self.graf_cycles.pack(side="left", fill="x", expand=True)
+        cyc_sb.config(command=self.graf_cycles.yview)
         self._trw(tk.Label(right, text=_tr("🕳 Osierocone"), font=FONT_BOLD,
                  bg=BG_PANEL, fg="#f0c050"), "🕳 Osierocone").pack(anchor="w", padx=10, pady=(2, 2))
-        self.graf_orphans = tk.Listbox(right, font=FONT_MONO, bg=BG_INPUT, fg=FG_WHITE,
+        orp_wrap = tk.Frame(right, bg=BG_PANEL)
+        orp_wrap.pack(fill="x", padx=8, pady=(0, 8))
+        orp_sb = tk.Scrollbar(orp_wrap, orient="vertical", bg=BG_PANEL,
+                              troughcolor=BG_PANEL, width=8)
+        orp_sb.pack(side="right", fill="y")
+        self.graf_orphans = tk.Listbox(orp_wrap, font=FONT_MONO, bg=BG_INPUT, fg=FG_WHITE,
                                        relief="flat", highlightthickness=0, height=5,
-                                       selectbackground=BG_ROW_SEL, activestyle="none")
-        self.graf_orphans.pack(fill="x", padx=8, pady=(0, 8))
+                                       selectbackground=BG_ROW_SEL, activestyle="none",
+                                       yscrollcommand=orp_sb.set)
+        self.graf_orphans.pack(side="left", fill="x", expand=True)
+        orp_sb.config(command=self.graf_orphans.yview)
 
         self._mod_graf_refresh()
 
@@ -11106,10 +11171,25 @@ class CodeMate(tk.Tk):
         # ════════════════
         # LEWA: formularz
         # ════════════════
-        left = tk.Frame(body, bg=BG_PANEL, width=320,
+        left = tk.Frame(body, bg=BG_PANEL, width=330,
                         highlightthickness=1, highlightbackground=BORDER_CLR)
         left.pack(side="left", fill="y", padx=(0, 5))
         left.pack_propagate(False)
+
+        # Formularz jest przewijany pionowo — pola mogą przekraczać wysokość okna.
+        l_sb = tk.Scrollbar(left, orient="vertical", bg=BG_PANEL,
+                            troughcolor=BG_PANEL, width=10)
+        l_sb.pack(side="right", fill="y")
+        l_canvas = tk.Canvas(left, bg=BG_PANEL, highlightthickness=0,
+                             yscrollcommand=l_sb.set)
+        l_canvas.pack(side="left", fill="both", expand=True)
+        l_sb.config(command=l_canvas.yview)
+        left = tk.Frame(l_canvas, bg=BG_PANEL)
+        l_win = l_canvas.create_window((0, 0), window=left, anchor="nw")
+        left.bind("<Configure>",
+                  lambda _e: l_canvas.configure(scrollregion=l_canvas.bbox("all")))
+        l_canvas.bind("<Configure>",
+                      lambda e: l_canvas.itemconfigure(l_win, width=e.width))
 
         def section(txt):
             tk.Frame(left, bg=BORDER_CLR, height=1).pack(fill="x", pady=(8, 2))
@@ -11631,10 +11711,10 @@ class CodeMate(tk.Tk):
             ("📋 Info o modułach",       lambda: self._menu_pokaz_mod("info")),
             ("🔄 Odśwież info modułów",  self._mod_refresh_info),
         ]:
-            tk.Button(p3, text=txt, font=FONT_UI, bg=BTN_DARK, fg=FG_WHITE,
+            self._trw(tk.Button(p3, text=_tr(txt), font=FONT_UI, bg=BTN_DARK, fg=FG_WHITE,
                       relief="flat", padx=10, pady=5, cursor="hand2", anchor="w",
                       activebackground=BTN_HOVER, activeforeground=FG_WHITE,
-                      command=cmd).pack(fill="x", padx=8, pady=2)
+                      command=cmd), txt).pack(fill="x", padx=8, pady=2)
 
         # Panel 4: Informacje o autorze
         p4 = tk.Frame(bot_paned, bg=BG_PANEL,
@@ -11654,8 +11734,8 @@ class CodeMate(tk.Tk):
         for label, value in author_info:
             row = tk.Frame(p4, bg=BG_PANEL)
             row.pack(fill="x", padx=10, pady=3)
-            tk.Label(row, text=f"{label}:", font=FONT_BOLD, bg=BG_PANEL,
-                     fg=FG_GRAY, width=10, anchor="w").pack(side="left")
+            self._trw(tk.Label(row, text=_tr(f"{label}:"), font=FONT_BOLD, bg=BG_PANEL,
+                     fg=FG_GRAY, width=10, anchor="w"), f"{label}:").pack(side="left")
             tk.Label(row, text=value, font=FONT_UI, bg=BG_PANEL,
                      fg=FG_WHITE, anchor="w").pack(side="left", padx=4)
 
@@ -14764,7 +14844,7 @@ class CodeMate(tk.Tk):
         """Zwraca (rekord, kod, kategoria, nazwa) dla wybranego skryptu/formularza."""
         if getattr(self, "_runner_mode_edit", False) and hasattr(self, "text_kod"):
             kod = self.text_kod.get("1.0", "end-1c")
-            nazwa = (self.entry_nazwa.get().strip() or "formularz")
+            nazwa = (self.entry_nazwa.get().strip() or _tr("formularz"))
             return None, kod, self.var_kat.get(), nazwa
         idx = getattr(self, "_runner_current_idx", None)
         if idx is None or idx >= len(self.skrypty):
@@ -14971,7 +15051,7 @@ class CodeMate(tk.Tk):
             if sc is not None:
                 sc["zaufany"] = True
             return True
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.title("Uruchomienie kodu")
         dlg.configure(bg=BG_DARK)
         dlg.transient(self)
@@ -15379,7 +15459,7 @@ class CodeMate(tk.Tk):
             return
         plan = self._sched_plan(sc) or {"aktywny": False, "co_min": 0, "o_godzinie": "",
                                         "args": sc.get("runner_args") or ""}
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.title(_tr("Harmonogram") + f" — {sc.get('nazwa')}")
         dlg.configure(bg=BG_DARK)
         dlg.transient(self)
@@ -15498,7 +15578,7 @@ class CodeMate(tk.Tk):
         if getattr(self, "_shutting_down", False):
             return
         try:
-            t = tk.Toplevel(self)
+            t = _popup(self)
             t.withdraw()
             t.overrideredirect(True)
             try:
@@ -15747,7 +15827,7 @@ class CodeMate(tk.Tk):
         if not isinstance(sc, dict):
             messagebox.showinfo(_tr("ENV"), _tr("Najpierw wybierz skrypt."))
             return
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.title(_tr("ENV") + " — " + sc.get("nazwa", ""))
         dlg.configure(bg=BG_DARK)
         dlg.transient(self)
@@ -15980,9 +16060,9 @@ class CodeMate(tk.Tk):
     def _runner_load_form(self):
         """Wczytuje kod z formularza 'Nowy skrypt' do runnera."""
         self._runner_mode_edit = True
-        nm = (self.entry_nazwa.get().strip() if hasattr(self, "entry_nazwa") else "") or "(bez nazwy)"
+        nm = (self.entry_nazwa.get().strip() if hasattr(self, "entry_nazwa") else "") or _tr("(bez nazwy)")
         kat = self.var_kat.get() if hasattr(self, "var_kat") else ""
-        label = f"formularz: {nm}  [{kat}]"
+        label = f"{_tr('Formularz:')} {nm}  [{kat}]"
         if hasattr(self, "_runner_lbl_target"):
             self._runner_lbl_target.config(text=label)
         if hasattr(self, "_runner_lbl_target2"):
@@ -16136,7 +16216,7 @@ class CodeMate(tk.Tk):
                     w.see("end")
 
     def _menu_ustawienia_runner(self):
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.title("Runner — ustawienia")
         dlg.configure(bg=BG_DARK)
         dlg.transient(self)
@@ -16215,6 +16295,9 @@ class CodeMate(tk.Tk):
 
         # Wspólny panel wyjścia — w zakładce Skrypty → Runner oraz w zakładce Runner
         self._runner_main_frame = tk.Frame(self.sub_content, bg=BG_DARK)
+        # Zarejestruj w sub_frames, żeby _sel_sub() chował go przy zmianie
+        # pod-zakładki (inaczej panel zostaje widoczny na każdej pod-zakładce).
+        self.sub_frames["runner"] = self._runner_main_frame
         inner = tk.Frame(self._runner_main_frame, bg=BG_DARK)
         inner.pack(fill="both", expand=True, padx=10, pady=8)
         bar = tk.Frame(inner, bg=BG_DARK)
@@ -18112,7 +18195,7 @@ class CodeMate(tk.Tk):
         """Kreator pluginu — generuje szablon pliku .py w katalogu plugins/."""
         if not self._plugin_manager or not _CREATOR_AVAILABLE:
             return
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.title(_tr("Nowy plugin"))
         dlg.transient(self)
         dlg.grab_set()
@@ -18161,7 +18244,7 @@ class CodeMate(tk.Tk):
                 n=sum(1 for v in hook_vars.values() if v.get())))
 
         def _hooks_popup():
-            top = tk.Toplevel(dlg)
+            top = _popup(dlg)
             top.title(_tr("Hooki do wygenerowania"))
             top.geometry("560x360")
             top.transient(dlg)
@@ -18225,7 +18308,7 @@ class CodeMate(tk.Tk):
                 n=sum(1 for v in nav_vars.values() if v.get())))
 
         def _nav_popup():
-            top = tk.Toplevel(dlg)
+            top = _popup(dlg)
             top.title(_tr("Komendy nawigacji"))
             top.geometry("640x480")
             top.transient(dlg)
@@ -18296,7 +18379,7 @@ class CodeMate(tk.Tk):
                 n=sum(1 for v in file_vars.values() if v.get())))
 
         def _files_popup():
-            top = tk.Toplevel(dlg)
+            top = _popup(dlg)
             top.title(_tr("Operacje na plikach"))
             top.geometry("560x380")
             top.transient(dlg)
@@ -18413,7 +18496,7 @@ class CodeMate(tk.Tk):
         if not self._plugin_manager:
             return
         cmds = self._plugin_manager.plugin_commands()
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.title(_tr("Komendy pluginów (/?)"))
         dlg.geometry("620x400")
         dlg.transient(self)
@@ -18471,7 +18554,7 @@ class CodeMate(tk.Tk):
         """Okno z listą hooków i liczbą zarejestrowanych callbacków."""
         if not self._plugin_manager:
             return
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.title(_tr("Hooki pluginów"))
         dlg.geometry("560x420")
         dlg.transient(self)
@@ -18511,7 +18594,7 @@ class CodeMate(tk.Tk):
         info = plugin.get_info()
         path = self._plugin_manager.get_plugin_path(plugin_name)
 
-        dlg = tk.Toplevel(self)
+        dlg = _popup(self)
         dlg.title(f"Plugin: {plugin_name}")
         dlg.geometry("480x380")
         dlg.transient(self)
@@ -18580,7 +18663,7 @@ class CodeMate(tk.Tk):
                        else APP_DIR / "plugins")
         marketplace = PluginMarketplace(plugins_dir)
 
-        dialog = tk.Toplevel(self)
+        dialog = _popup(self)
         dialog.title("Marketplace pluginów")
         dialog.geometry("760x420")
         dialog.transient(self)
