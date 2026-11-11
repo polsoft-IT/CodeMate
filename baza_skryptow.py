@@ -7717,7 +7717,7 @@ class CodeMate(tk.Tk):
             lines_kat.append(f"  {kat:<14} {bar:<20} {cnt}")
         self._stat_kat_text.config(state="normal")
         self._stat_kat_text.delete("1.0", "end")
-        self._stat_kat_text.insert("1.0", "\n".join(lines_kat) if lines_kat else _tr("(brak danych)"))
+        self._stat_kat_text.insert("1.0", "\n".join(lines_kat) if lines_kat else "(brak danych)")
         self._stat_kat_text.config(state="disabled")
 
         # tagi
@@ -7729,7 +7729,7 @@ class CodeMate(tk.Tk):
             lines_tag.append(f"  {tag:<16} {bar:<18} {cnt}")
         self._stat_tag_text.config(state="normal")
         self._stat_tag_text.delete("1.0", "end")
-        self._stat_tag_text.insert("1.0", "\n".join(lines_tag) if lines_tag else _tr("(brak tagów)"))
+        self._stat_tag_text.insert("1.0", "\n".join(lines_tag) if lines_tag else "(brak tagów)")
         self._stat_tag_text.config(state="disabled")
 
         # największe skrypty
@@ -7738,8 +7738,7 @@ class CodeMate(tk.Tk):
         for i, sc in enumerate(sized, 1):
             lc = len(sc.get("kod", "").splitlines())
             ch = len(sc.get("kod", ""))
-            lines_size.append(_tr("  {i:2}. {n:<22} {lc:5} linii  {ch:6} zn").format(
-                i=i, n=sc.get('nazwa','?')[:22], lc=lc, ch=ch))
+            lines_size.append(f"  {i:2}. {sc.get('nazwa','?')[:22]:<22} {lc:5} linii  {ch:6} zn")
         self._stat_size_text.config(state="normal")
         self._stat_size_text.delete("1.0", "end")
         self._stat_size_text.insert("1.0", "\n".join(lines_size) if lines_size else "(brak)")
@@ -7756,7 +7755,7 @@ class CodeMate(tk.Tk):
                 f"[{ok}]  {sc.get('ostatni_run') or '-'}")
         self._stat_run_text.config(state="normal")
         self._stat_run_text.delete("1.0", "end")
-        self._stat_run_text.insert("1.0", "\n".join(lines_run) if lines_run else _tr("(brak uruchomień — F9 w zakładce Runner)"))
+        self._stat_run_text.insert("1.0", "\n".join(lines_run) if lines_run else "(brak uruchomień — F9 w zakładce Runner)")
         self._stat_run_text.config(state="disabled")
 
     def _stat_export(self):
@@ -7779,27 +7778,27 @@ class CodeMate(tk.Tk):
         ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         report = [
             "=" * 60,
-            _tr("  RAPORT BAZY SKRYPTÓW — {ts}").format(ts=ts),
+            f"  RAPORT BAZY SKRYPTÓW — {ts}",
             "=" * 60,
-            _tr("  Łącznie skryptów  : {n}").format(n=len(s)),
-            _tr("  Kategorii         : {n}").format(n=len(kat_cnt)),
-            _tr("  Unikalnych tagów  : {n}").format(n=len(tags)),
-            _tr("  Łącznie linii kodu: {n}").format(n=f"{lines:,}"),
+            f"  Łącznie skryptów  : {len(s)}",
+            f"  Kategorii         : {len(kat_cnt)}",
+            f"  Unikalnych tagów  : {len(tags)}",
+            f"  Łącznie linii kodu: {lines:,}",
             "",
-            _tr("── Według kategorii ──────────────────────────"),
+            "── Według kategorii ──────────────────────────",
         ]
         for kat, cnt in sorted(kat_cnt.items(), key=lambda x: -x[1]):
-            report.append(_tr("  {kat:<20} {cnt} skryptów").format(kat=kat, cnt=cnt))
-        report += ["", _tr("── Top 20 tagów ──────────────────────────────")]
+            report.append(f"  {kat:<20} {cnt} skryptów")
+        report += ["", "── Top 20 tagów ──────────────────────────────"]
         for tag, cnt in tags.most_common(20):
             report.append(f"  {tag:<20} {cnt}×")
-        report += ["", _tr("── Lista wszystkich skryptów ─────────────────")]
+        report += ["", "── Lista wszystkich skryptów ─────────────────"]
         for i, sc in enumerate(s, 1):
             report.append(f"  {i:3}. [{sc.get('kategoria','?'):12}] {sc.get('nazwa','?')}")
         report.append("=" * 60)
         with open(path, "w", encoding="utf-8") as f:
             f.write("\n".join(report))
-        messagebox.showinfo(_tr("Eksport"), _tr("Raport zapisany:\n{path}").format(path=path))
+        messagebox.showinfo(_tr("Eksport"), f"Raport zapisany:\n{path}")
 
     def _show_sub_statystyki(self):
         self._stat_refresh()
@@ -11715,7 +11714,7 @@ class CodeMate(tk.Tk):
             ("📟 Log / Terminal", "log"),
         ]
         for j, (lbl, key) in enumerate(venv_tabs):
-            b = tk.Button(venv_sub_bar, text=_tr(lbl), font=FONT_UI,
+            b = tk.Button(venv_sub_bar, text=lbl, font=FONT_UI,
                           bg=BG_SUBTAB_ACT if j == 0 else BG_SUBTAB_INACT,
                           fg=FG_WHITE       if j == 0 else FG_GRAY,
                           relief="flat", padx=14, pady=6, cursor="hand2",
@@ -11758,11 +11757,9 @@ class CodeMate(tk.Tk):
     def _venv_set_status(self, msg, color="#6dde84"):
         self.venv_lbl_status.config(text=msg, fg=color)
 
-    def _venv_run(self, cmd, success_msg=None, error_prefix=None):
+    def _venv_run(self, cmd, success_msg="OK", error_prefix="Błąd"):
         """Uruchom polecenie subprocess, zaloguj wynik."""
         import subprocess
-        success_msg = _tr(success_msg) if success_msg else ""
-        error_prefix = _tr(error_prefix) if error_prefix else _tr("Błąd")
         self._venv_log(f"$ {' '.join(cmd)}", "cmd")
         try:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
@@ -11777,15 +11774,15 @@ class CodeMate(tk.Tk):
                 self._venv_set_status(success_msg)
                 return True
             else:
-                self._venv_log(_tr("{error_prefix}: kod {code}").format(error_prefix=error_prefix, code=result.returncode), "error")
+                self._venv_log(f"{error_prefix}: kod {result.returncode}", "error")
                 self._venv_set_status(f"{error_prefix}!", "#e07070")
                 return False
         except FileNotFoundError:
-            self._venv_log(_tr("Nie znaleziono polecenia: {cmd}").format(cmd=cmd[0]), "error")
-            self._venv_set_status(_tr("Błąd — brak polecenia"), "#e07070")
+            self._venv_log(f"Nie znaleziono polecenia: {cmd[0]}", "error")
+            self._venv_set_status("Błąd — brak polecenia", "#e07070")
             return False
         except subprocess.TimeoutExpired:
-            self._venv_log(_tr("Przekroczono limit czasu (120s)"), "error")
+            self._venv_log("Przekroczono limit czasu (120s)", "error")
             self._venv_set_status("Timeout!", "#e07070")
             return False
 
@@ -11812,7 +11809,7 @@ class CodeMate(tk.Tk):
                 if os.path.isfile(py):
                     self._venv_list.append({"name": name, "path": path})
         self._venv_update_listbox()
-        self._venv_log(_tr("Znaleziono {n} środowisk w: {base}").format(n=len(self._venv_list), base=base), "info")
+        self._venv_log(f"Znaleziono {len(self._venv_list)} środowisk w: {base}", "info")
 
     def _venv_update_listbox(self):
         if not hasattr(self, "venv_listbox"):
@@ -11838,7 +11835,7 @@ class CodeMate(tk.Tk):
         if not env:
             return
         self._venv_active = env
-        self._venv_set_status(_tr("Wybrano: {name}").format(name=env['name']))
+        self._venv_set_status(f"Wybrano: {env['name']}")
         self._venv_fill_info(env)
 
     def _venv_fill_info(self, env):
@@ -11848,24 +11845,24 @@ class CodeMate(tk.Tk):
             return
         py = self._venv_python_in_env(env["path"])
         lines = [
-            _tr("  Nazwa:   {v}").format(v=env['name']),
-            _tr("  Ścieżka: {v}").format(v=env['path']),
-            _tr("  Python:  {v}").format(v=py),
+            f"  Nazwa:   {env['name']}",
+            f"  Ścieżka: {env['path']}",
+            f"  Python:  {py}",
         ]
         # wersja pythona
         try:
             r = subprocess.run([py, "--version"], capture_output=True, text=True, timeout=5)
             ver = (r.stdout or r.stderr).strip()
-            lines.append(_tr("  Wersja:  {v}").format(v=ver))
+            lines.append(f"  Wersja:  {ver}")
         except Exception:
-            lines.append(_tr("  Wersja:  (nie można sprawdzić)"))
+            lines.append("  Wersja:  (nie można sprawdzić)")
         # rozmiar
         try:
             total = sum(
                 os.path.getsize(os.path.join(dp, f))
                 for dp, dn, fn in os.walk(env["path"]) for f in fn
             )
-            lines.append(_tr("  Rozmiar: {v}").format(v=f"{total / 1024 / 1024:.1f} MB"))
+            lines.append(f"  Rozmiar: {total / 1024 / 1024:.1f} MB")
         except Exception:
             pass
         self.venv_info_text.config(state="normal")
@@ -11883,7 +11880,7 @@ class CodeMate(tk.Tk):
         bar.pack(fill="x")
 
         def btn(text, cmd, color=BTN_DARK):
-            tk.Button(bar, text=_tr(text), font=FONT_UI, bg=color, fg=FG_WHITE,
+            tk.Button(bar, text=text, font=FONT_UI, bg=color, fg=FG_WHITE,
                       relief="flat", padx=10, pady=4, cursor="hand2",
                       activebackground=BTN_HOVER, activeforeground=FG_WHITE,
                       command=cmd).pack(side="left", padx=3)
@@ -11953,7 +11950,7 @@ class CodeMate(tk.Tk):
         act_bar.pack(fill="x")
 
         def abtn(text, cmd, color=BTN_DARK):
-            tk.Button(act_bar, text=_tr(text), font=FONT_UI, bg=color, fg=FG_WHITE,
+            tk.Button(act_bar, text=text, font=FONT_UI, bg=color, fg=FG_WHITE,
                       relief="flat", padx=10, pady=4, cursor="hand2",
                       activebackground=BTN_HOVER,
                       command=cmd).pack(side="left", padx=3)
@@ -11975,14 +11972,14 @@ class CodeMate(tk.Tk):
             messagebox.showinfo(_tr("Brak wyboru"), _tr("Wybierz środowisko z listy."))
             return
         if messagebox.askyesno(_tr("Usuń env"),
-                               _tr("Usunąć środowisko '{name}'?\n{path}\n\nTej operacji nie można cofnąć!").format(name=env['name'], path=env['path'])):
+                               f"Usunąć środowisko '{env['name']}'?\n{env['path']}\n\nTej operacji nie można cofnąć!"):
             try:
                 shutil.rmtree(env["path"])
-                self._venv_log(_tr("Usunięto: {name}").format(name=env['name']), "ok")
-                self._venv_set_status(_tr("Usunięto: {name}").format(name=env['name']))
+                self._venv_log(f"Usunięto: {env['name']}", "ok")
+                self._venv_set_status(f"Usunięto: {env['name']}")
                 self._venv_refresh_list()
             except Exception as e:
-                self._venv_log(_tr("Błąd usuwania: {e}").format(e=e), "error")
+                self._venv_log(f"Błąd usuwania: {e}", "error")
                 messagebox.showerror(_tr("Błąd"), str(e))
 
     def _venv_copy_path(self):
@@ -11992,7 +11989,7 @@ class CodeMate(tk.Tk):
             return
         self.clipboard_clear()
         self.clipboard_append(env["path"])
-        messagebox.showinfo(_tr("Skopiowano"), _tr("Ścieżka skopiowana:\n{path}").format(path=env['path']))
+        messagebox.showinfo(_tr("Skopiowano"), f"Ścieżka skopiowana:\n{env['path']}")
 
     def _venv_open_folder(self):
         import subprocess, sys
@@ -12025,10 +12022,10 @@ class CodeMate(tk.Tk):
             return
         pip = self._venv_pip_in_env(env["path"])
         self._venv_sel(5, "log")
-        self._venv_log(_tr("Aktualizuję pip w: {name}").format(name=env['name']), "info")
+        self._venv_log(f"Aktualizuję pip w: {env['name']}", "info")
         self.after(50, lambda: self._venv_run(
             [pip, "install", "--upgrade", "pip"],
-            success_msg=_tr("pip zaktualizowany!")))
+            success_msg="pip zaktualizowany!"))
 
     # ── POD-ZAKŁADKA 2: Utwórz env ───────────────────────────────────────────
     def _build_venv_create(self, parent):
@@ -12047,7 +12044,7 @@ class CodeMate(tk.Tk):
         def row(label, widget_factory):
             r = tk.Frame(body, bg=BG_DARK)
             r.pack(fill="x", pady=5)
-            tk.Label(r, text=_tr(label), font=FONT_BOLD, bg=BG_DARK,
+            tk.Label(r, text=label, font=FONT_BOLD, bg=BG_DARK,
                      fg=FG_GRAY, width=22, anchor="w").pack(side="left")
             w = widget_factory(r)
             w.pack(side="left", fill="x", expand=True)
@@ -12106,7 +12103,7 @@ class CodeMate(tk.Tk):
             ("Wyczyść jeśli istnieje", self.venv_opt_clear),
             ("Aktualizuj deps",        self.venv_opt_upgrade),
         ]:
-            tk.Checkbutton(opts, text=_tr(text), variable=var, font=FONT_UI,
+            tk.Checkbutton(opts, text=text, variable=var, font=FONT_UI,
                            bg=BG_DARK, fg=FG_WHITE, activebackground=BG_DARK,
                            selectcolor=BG_INPUT).pack(side="left", padx=10)
 
@@ -12166,19 +12163,19 @@ class CodeMate(tk.Tk):
             cmd.append("--upgrade")
         cmd.append(env_path)
 
-        self.venv_create_progress.config(text=_tr("⏳ Tworzenie '{name}'…").format(name=name), fg="#f0c050")
+        self.venv_create_progress.config(text=f"⏳ Tworzenie '{name}'…", fg="#f0c050")
         self._venv_sel(5, "log")
-        self._venv_log(_tr("Tworzenie środowiska: {name}").format(name=name), "info")
-        self._venv_log(_tr("Ścieżka: {path}").format(path=env_path), "info")
+        self._venv_log(f"Tworzenie środowiska: {name}", "info")
+        self._venv_log(f"Ścieżka: {env_path}", "info")
 
         def do_create():
-            ok = self._venv_run(cmd, success_msg=_tr("Środowisko '{name}' utworzone!").format(name=name))
+            ok = self._venv_run(cmd, success_msg=f"Środowisko '{name}' utworzone!")
             if ok:
-                self.venv_create_progress.config(text=_tr("✅ Środowisko '{name}' gotowe!").format(name=name), fg="#6dde84")
+                self.venv_create_progress.config(text=f"✅ Środowisko '{name}' gotowe!", fg="#6dde84")
                 self._venv_refresh_list()
                 self._venv_sel(0, "lista")
             else:
-                self.venv_create_progress.config(text=_tr("❌ Błąd tworzenia '{name}'").format(name=name), fg="#e07070")
+                self.venv_create_progress.config(text=f"❌ Błąd tworzenia '{name}'", fg="#e07070")
 
         self.after(50, do_create)
 
@@ -12252,7 +12249,7 @@ class CodeMate(tk.Tk):
                                            yscrollcommand=vsb.set)
         vsb.config(command=self.venv_pkg_tree.yview)
         for col, w in [("Pakiet", 200), ("Wersja", 120), ("Lokalizacja", 500)]:
-            self.venv_pkg_tree.heading(col, text=_tr(col))
+            self.venv_pkg_tree.heading(col, text=col)
             self.venv_pkg_tree.column(col, width=w, minwidth=80)
         self.venv_pkg_tree.pack(fill="both", expand=True)
         self.venv_pkg_tree.tag_configure("odd",  background=BG_ROW_ODD)
@@ -12270,7 +12267,7 @@ class CodeMate(tk.Tk):
             return
         pip = self._venv_pip_in_env(env["path"])
         self.venv_pkg_env_label.config(text=f"🐍 {env['name']}")
-        self._venv_log(_tr("Ładowanie pakietów z: {name}").format(name=env['name']), "info")
+        self._venv_log(f"Ładowanie pakietów z: {env['name']}", "info")
         try:
             result = subprocess.run([pip, "list", "--format=json"],
                                     capture_output=True, text=True, timeout=30)
@@ -12292,10 +12289,10 @@ class CodeMate(tk.Tk):
                 self.venv_pkg_tree.insert("", "end",
                                            values=(pkg["name"], pkg["version"], loc),
                                            tags=(tag,))
-            self.venv_pkg_count.config(text=_tr("Pakietów: {n}").format(n=len(pkgs)))
-            self._venv_log(_tr("Załadowano {n} pakietów.").format(n=len(pkgs)), "ok")
+            self.venv_pkg_count.config(text=f"Pakietów: {len(pkgs)}")
+            self._venv_log(f"Załadowano {len(pkgs)} pakietów.", "ok")
         except Exception as e:
-            self._venv_log(_tr("Błąd ładowania pakietów: {e}").format(e=e), "error")
+            self._venv_log(f"Błąd ładowania pakietów: {e}", "error")
 
     def _venv_install_pkg(self):
         pkg = self.venv_pkg_install_e.get().strip()
@@ -12308,10 +12305,10 @@ class CodeMate(tk.Tk):
             return
         pip = self._venv_pip_in_env(env["path"])
         self._venv_sel(5, "log")
-        self._venv_log(_tr("Instaluję: {pkg} w {env}").format(pkg=pkg, env=env['name']), "info")
+        self._venv_log(f"Instaluję: {pkg} w {env['name']}", "info")
         self.after(50, lambda: (
             self._venv_run([pip, "install", pkg],
-                           success_msg=_tr("Zainstalowano: {pkg}").format(pkg=pkg)),
+                           success_msg=f"Zainstalowano: {pkg}"),
             self._venv_load_packages()
         ))
 
@@ -12324,14 +12321,14 @@ class CodeMate(tk.Tk):
         env = self._venv_active or self._venv_get_selected()
         if not env:
             return
-        if not messagebox.askyesno(_tr("Odinstaluj"), _tr("Odinstalować '{pkg}' z '{env}'?").format(pkg=pkg, env=env['name'])):
+        if not messagebox.askyesno(_tr("Odinstaluj"), f"Odinstalować '{pkg}' z '{env['name']}'?"):
             return
         pip = self._venv_pip_in_env(env["path"])
         self._venv_sel(5, "log")
-        self._venv_log(_tr("Odinstaluję: {pkg}").format(pkg=pkg), "info")
+        self._venv_log(f"Odinstaluję: {pkg}", "info")
         self.after(50, lambda: (
             self._venv_run([pip, "uninstall", "-y", pkg],
-                           success_msg=_tr("Odinstalowano: {pkg}").format(pkg=pkg)),
+                           success_msg=f"Odinstalowano: {pkg}"),
             self._venv_load_packages()
         ))
 
@@ -12387,14 +12384,14 @@ class CodeMate(tk.Tk):
             messagebox.showinfo(_tr("Brak env"), _tr("Wybierz środowisko z Listy envów."))
             return
         pip = self._venv_pip_in_env(env["path"])
-        self._venv_log(_tr("Generuję requirements dla: {name}").format(name=env['name']), "info")
+        self._venv_log(f"Generuję requirements dla: {env['name']}", "info")
         try:
             result = subprocess.run([pip, "freeze"], capture_output=True, text=True, timeout=30)
             self.venv_req_text.delete("1.0", "end")
             self.venv_req_text.insert("1.0", result.stdout)
-            self._venv_log(_tr("requirements.txt wygenerowany."), "ok")
+            self._venv_log("requirements.txt wygenerowany.", "ok")
         except Exception as e:
-            self._venv_log(_tr("Błąd: {e}").format(e=e), "error")
+            self._venv_log(f"Błąd: {e}", "error")
 
     def _venv_save_req(self):
         content = self.venv_req_text.get("1.0", "end-1c").strip()
@@ -12408,8 +12405,8 @@ class CodeMate(tk.Tk):
         if path:
             with open(path, "w", encoding="utf-8") as fh:
                 fh.write(content)
-            self._venv_log(_tr("Zapisano: {path}").format(path=path), "ok")
-            messagebox.showinfo(_tr("Zapisano"), _tr("Plik zapisany:\n{path}").format(path=path))
+            self._venv_log(f"Zapisano: {path}", "ok")
+            messagebox.showinfo(_tr("Zapisano"), f"Plik zapisany:\n{path}")
 
     def _venv_install_req(self):
         env = self._venv_active or self._venv_get_selected()
@@ -12423,10 +12420,10 @@ class CodeMate(tk.Tk):
             return
         pip = self._venv_pip_in_env(env["path"])
         self._venv_sel(5, "log")
-        self._venv_log(_tr("Instaluję z: {path}").format(path=path), "info")
+        self._venv_log(f"Instaluję z: {path}", "info")
         self.after(50, lambda: self._venv_run(
             [pip, "install", "-r", path],
-            success_msg=_tr("Pakiety zainstalowane z requirements.txt!")))
+            success_msg="Pakiety zainstalowane z requirements.txt!"))
 
     def _venv_copy_req(self):
         content = self.venv_req_text.get("1.0", "end-1c")
@@ -12450,7 +12447,7 @@ class CodeMate(tk.Tk):
 
         def section(title):
             tk.Frame(body, bg=BORDER_CLR, height=1).pack(fill="x", pady=(14, 4))
-            tk.Label(body, text=_tr(title), font=FONT_BOLD, bg=BG_DARK,
+            tk.Label(body, text=title, font=FONT_BOLD, bg=BG_DARK,
                      fg=ACCENT_BLUE).pack(anchor="w")
 
         section("📁 Domyślny katalog środowisk")
@@ -12484,9 +12481,9 @@ class CodeMate(tk.Tk):
         section("ℹ Środowisko Python (bieżące)")
         import platform
         for label, val in [
-            (_tr("Python:"), sys.version.split()[0]),
-            (_tr("Plik:"),   sys.executable),
-            (_tr("Platforma:"), f"{platform.system()} {platform.release()}"),
+            ("Python:", sys.version.split()[0]),
+            ("Plik:",   sys.executable),
+            ("Platforma:", f"{platform.system()} {platform.release()}"),
         ]:
             r = tk.Frame(body, bg=BG_DARK)
             r.pack(fill="x", pady=2)
@@ -12509,7 +12506,7 @@ class CodeMate(tk.Tk):
             for tool, label in self._venv_tool_labels.items():
                 found = results.get(tool, "")
                 label.configure(
-                    text=str(found) if found else _tr("nie znaleziono"),
+                    text=str(found) if found else "nie znaleziono",
                     fg="#6dde84" if found else "#e07070",
                 )
 
@@ -12609,7 +12606,7 @@ class CodeMate(tk.Tk):
         if path:
             with open(path, "w", encoding="utf-8") as fh:
                 fh.write(content)
-            messagebox.showinfo(_tr("Zapisano"), _tr("Log zapisany:\n{path}").format(path=path))
+            messagebox.showinfo(_tr("Zapisano"), f"Log zapisany:\n{path}")
 
     def _show_venv(self):
         self.main_frames["venv"].pack(fill="both", expand=True)
