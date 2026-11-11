@@ -2,7 +2,7 @@
 setlocal EnableExtensions
 cd /d "%~dp0"
 echo ========================================
-echo  CodeMate - running tests
+echo  CodeMate - uruchamianie testow
 echo ========================================
 echo.
 
@@ -31,9 +31,9 @@ set "TEST_EXIT_CODE=%errorlevel%"
 :finish
 echo.
 if "%TEST_EXIT_CODE%"=="0" (
-    echo Tests completed successfully.
+    echo Testy zakonczone powodzeniem.
 ) else (
-    echo Tests failed. Exit code: %TEST_EXIT_CODE%
+    echo Testy nie powiodly sie. Kod wyjscia: %TEST_EXIT_CODE%
 )
 echo.
 pause
